@@ -1,0 +1,928 @@
+/* Color variables */
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --accent-color: #e74c3c;
+  --background-color: #f8f9fa;
+  --card-background: #ffffff;
+  --text-color: #2c3e50;
+  --text-muted: #7f8c8d;
+}
+
+body {
+  background-color: var(--background-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-color);
+}
+
+/* Navbar styling */
+.navbar {
+  background-color: var(--primary-color) !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  padding: 1rem 2rem;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white !important;
+}
+
+.nav-link {
+  color: rgba(255,255,255,0.8) !important;
+  font-weight: 500;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: white !important;
+  background-color: rgba(255,255,255,0.1);
+  border-radius: 8px;
+}
+
+.main-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Dashboard card styling */
+.dashboard-card {
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  border: none;
+  margin-bottom: 2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.dashboard-card .card-header {
+  background-color: transparent;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  padding: 1.5rem;
+  border-radius: 15px 15px 0 0 !important;
+}
+
+.dashboard-card .card-header h5 {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.dashboard-card .card-header i {
+  color: #3498db;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Stats cards styling */
+.stat-card {
+  background: linear-gradient(135deg, #2c3e50, #3498db);
+  color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  height: 100%;
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-card .stat-title {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card .stat-value {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card .stat-trend {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.chart-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.btn-custom {
+  border-radius: 8px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+  border-color: #2980b9;
+}
+
+.btn-outline-primary {
+  color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.analysis-section {
+  background-color: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.chart-wrapper {
+  height: 300px;
+  position: relative;
+}
+
+.direction-stats {
+  padding: 1.5rem;
+}
+
+.direction-stats p {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.direction-stats span {
+  font-weight: 600;
+  color: var(--secondary-color);
+}
+
+.modal-content {
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.modal-header {
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 15px 15px 0 0 !important;
+  border-bottom: none;
+  padding: 1.5rem;
+}
+
+.modal-header .btn-close {
+  color: white;
+  opacity: 0.8;
+}
+
+.modal-header .btn-close:hover {
+  opacity: 1;
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(0,0,0,0.05);
+  padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .main-container {
+    padding: 1rem;
+  }
+  
+  .stat-card {
+    margin-bottom: 1rem;
+  }
+}
+
+.camera-feed-container {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.camera-feed-container:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+}
+
+.camera-feed-container.main-camera {
+  border-left: 4px solid #3498db;
+}
+
+.camera-status-indicator[data-status="online"] {
+  background-color: #28a745;
+}
+
+.camera-status-indicator[data-status="offline"] {
+  background-color: #6c757d;
+}
+
+.camera-status-indicator[data-status="error"] {
+  background-color: #dc3545;
+}
+
+.camera-header {
+  padding: 0.5rem;
+}
+
+.camera-view {
+  position: relative;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.camera-view .overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 8px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+.status-item {
+  padding: 0.75rem;
+  background-color: rgba(0,0,0,0.02);
+  border-radius: 8px;
+}
+
+.alert-list .alert {
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  border: none;
+}
+
+.alert-list .alert i {
+  font-size: 1.1rem;
+}
+
+/* Settings card styling */
+.settings-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  height: 100%;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  transition: transform 0.2s;
+}
+
+.settings-card:hover {
+  transform: translateY(-3px);
+}
+
+.settings-card h6 {
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.form-select, .form-control {
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.1);
+  padding: 0.6rem 1rem;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.form-select:focus, .form-control:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+}
+
+.form-check-input:checked {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.form-range::-webkit-slider-thumb {
+  background: var(--secondary-color);
+}
+
+.form-range::-moz-range-thumb {
+  background: var(--secondary-color);
+}
+
+.incident-logs {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table th {
+  background-color: rgba(0,0,0,0.02);
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.dropdown-menu {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.dropdown-item {
+  padding: 0.5rem 1rem;
+  color: var(--text-color);
+}
+
+.dropdown-item:hover {
+  background-color: rgba(52, 152, 219, 0.1);
+  color: var(--secondary-color);
+}
+
+.dropdown-item i {
+  width: 20px;
+}
+
+.btn-outline-light {
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-light:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.footer-bg {
+  background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 100%);
+}
+
+.footer-links li {
+  transition: all 0.3s ease;
+}
+
+.footer-links li:hover {
+  transform: translateX(5px);
+}
+
+.footer-link {
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.footer-link:hover {
+  color: white;
+}
+
+.footer-header {
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.footer-header:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 50px;
+  background-color: var(--secondary-color);
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+}
+
+/* Camera Status Indicators */
+.camera-status-indicator {
+  font-size: 0.75rem;
+  font-weight: normal;
+  transition: all 0.3s ease;
+}
+
+.camera-status-indicator[data-status="offline"] {
+  background-color: #6c757d;
+}
+
+.camera-status-indicator[data-status="connecting"] {
+  background-color: #17a2b8;
+}
+
+.camera-status-indicator[data-status="connected"] {
+  background-color: #28a745;
+}
+
+.camera-status-indicator[data-status="error"] {
+  background-color: #dc3545;
+}
+
+/* Camera View Styles */
+.camera-view {
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f8f9fa;
+  border: 1px solid rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.camera-view:hover .camera-controls-overlay {
+  opacity: 1;
+}
+
+.camera-offline-overlay {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  height: 100%;
+  width: 100%;
+}
+
+.camera-connecting-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(255,255,255,0.9);
+  z-index: 10;
+}
+
+.camera-stream {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+}
+
+.camera-fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.camera-stream video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2; /* Ensure video is above the fallback */
+  object-fit: cover;
+  background-color: #000;
+}
+
+.camera-stream img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2; /* Ensure image is above the fallback */
+  object-fit: cover;
+}
+
+.camera-overlay-elements {
+  z-index: 5;
+}
+
+.camera-info-overlay {
+  background-color: rgba(0,0,0,0.5);
+  border-radius: 4px;
+  z-index: 6;
+}
+
+.camera-controls-overlay {
+  z-index: 6;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.camera-timestamp {
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+/* Camera Stream Controls */
+.camera-stream-controls .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* Camera Alert Panel */
+.camera-alerts-panel {
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.alert-icon {
+  font-size: 1.2rem;
+  padding-top: 0.25rem;
+}
+
+.pointer-events-none {
+  pointer-events: none;
+}
+
+.pointer-events-auto {
+  pointer-events: auto;
+}
+
+/* Animation for camera connection */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.pulse-animation {
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+/* Mini map styling */
+.mini-map {
+  background-color: #2c3e50;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.mini-map:hover {
+  width: 180px !important;
+  height: 180px !important;
+  z-index: 200 !important;
+}
+
+.mini-map div[style*="background-color: #ddd"] {
+  background-color: #34495e !important;
+}
+
+.mini-map div[style*="background-color: #555"] {
+  background-color: #7f8c8d !important;
+}
+
+.mini-map div[style*="background-color: #3498db"] {
+  background-color: #e74c3c !important;
+}
+
+.mini-map div[style*="border: 2px solid #3498db"] {
+  border: 2px solid rgba(231, 76, 60, 0.7) !important;
+}
+
+/* Incident table hover effect */
+.incidents-table tr {
+  transition: background-color 0.2s;
+}
+
+.incidents-table tr:hover {
+  background-color: rgba(52, 152, 219, 0.05);
+}
+
+/* Traffic analytics snapshot styles */
+.traffic-analytics-snapshot {
+  border-top: 1px solid rgba(0,0,0,0.05);
+  background-color: #f8f9fa;
+}
+
+.traffic-analytics-snapshot .fw-bold {
+  color: #3498db;
+}
+
+/* Add animation for the pulse dot */
+@keyframes pulse-animation {
+  0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(220, 53, 69, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+.pulse-dot {
+  animation: pulse-animation 2s infinite;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-color: #f5f5f5;
+    --background-color: #121212;
+    --card-background: #1e1e1e;
+    --muted-color: #aaa;
+    --border-color: #333;
+  }
+  
+  .bg-light {
+    background-color: #1e1e1e !important;
+  }
+  
+  .text-muted {
+    color: var(--muted-color) !important;
+  }
+  
+  .border-bottom {
+    border-color: var(--border-color) !important;
+  }
+  
+  .dashboard-card,
+  .settings-card,
+  .camera-feed-container {
+    background-color: var(--card-background);
+  }
+  
+  .table {
+    color: var(--text-color);
+  }
+}
+
+/* Pulse animation */
+@keyframes pulse-dot {
+  0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(220, 53, 69, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #dc3545;
+  border-radius: 50%;
+  animation: pulse-dot 2s infinite;
+}
+
+/* Traffic flow status colors */
+.traffic-flow-normal { color: #28a745; }
+.traffic-flow-moderate { color: #ffc107; }
+.traffic-flow-heavy { color: #dc3545; }
+
+/* Traffic analytics snapshot styles */
+.traffic-analytics-snapshot {
+  border-top: 1px solid rgba(0,0,0,0.05);
+  background-color: #f8f9fa;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+.traffic-status-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  height: 100%;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* Real-time metrics styling */
+.real-time-metrics {
+  background-color: rgba(44, 62, 80, 0.85);
+  color: white;
+}
+
+.camera-status-bar {
+  background-color: rgba(44, 62, 80, 0.85);
+  color: white;
+}
+
+/* Incident banner styling */
+.alert-danger {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #c0392b;
+  border-left: 4px solid #e74c3c;
+  border-color: rgba(231, 76, 60, 0.2);
+}
+
+/* Traffic analytics snapshot styles */
+.traffic-analytics-snapshot {
+  border-top: 1px solid rgba(0,0,0,0.05);
+  background-color: #f8f9fa;
+}
+
+.traffic-analytics-snapshot .fw-bold.text-primary {
+  color: #3498db !important;
+}
+
+.traffic-analytics-snapshot .fw-bold.text-success {
+  color: #2ecc71 !important;
+}
+
+.traffic-analytics-snapshot .fw-bold.text-danger {
+  color: #e74c3c !important;
+}
+
+.traffic-analytics-snapshot .fw-bold.text-warning {
+  color: #f39c12 !important;
+}
+
+/* Camera feed container styling */
+.camera-feed-container {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.camera-feed-container:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+}
+
+.camera-feed-container.main-camera {
+  border-left: 4px solid #3498db;
+}
+
+/* Stats and metrics styling */
+.progress .progress-bar.bg-success {
+  background-color: #2ecc71 !important;
+}
+
+.progress .progress-bar.bg-warning {
+  background-color: #f39c12 !important;
+}
+
+.progress .progress-bar.bg-danger {
+  background-color: #e74c3c !important;
+}
+
+/* Button styling */
+.btn-outline-primary {
+  color: #3498db;
+  border-color: #3498db;
+}
+
+.btn-outline-primary:hover {
+  background-color: #3498db;
+  border-color: #3498db;
+}
+
+.btn-primary {
+  background-color: #3498db;
+  border-color: #3498db;
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+  border-color: #2980b9;
+}
+
+/* Incidents table styling */
+.incidents-table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #ecf0f1;
+}
+
+.incidents-table tr {
+  transition: background-color 0.2s;
+}
+
+.incidents-table tr:hover {
+  background-color: rgba(52, 152, 219, 0.05);
+}
+
+.incident-logs {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* AI Detection elements */
+.ai-detection-overlay {
+  pointer-events: none;
+}
+
+.ai-detection-overlay .detection-box {
+  border: 2px solid rgba(231, 76, 60, 0.8);
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
+  animation: pulse-box 2s infinite;
+}
+
+@keyframes pulse-box {
+  0% { box-shadow: 0 0 5px rgba(231, 76, 60, 0.4); }
+  50% { box-shadow: 0 0 12px rgba(231, 76, 60, 0.7); }
+  100% { box-shadow: 0 0 5px rgba(231, 76, 60, 0.4); }
+}
+
+/* Camera view styling */
+.camera-view {
+  position: relative;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.camera-header {
+  padding: 0.8rem 1rem;
+}
+
+.camera-header h6 {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.camera-header i {
+  color: var(--secondary-color);
+}
+
+/* Camera feed transition effects */
+.camera-stream img, .camera-stream video {
+  transition: all 0.5s ease-in-out;
+}
+
+.camera-controls button {
+  transition: all 0.2s ease;
+}
+
+.camera-controls button:hover {
+  transform: scale(1.1);
+}
+
+.camera-controls button.active {
+  background-color: var(--secondary-color);
+  color: white;
+  border-color: var(--secondary-color);
+}
+
+/* Traffic flow indicators */
+.progress {
+  height: 6px;
+  background-color: rgba(0,0,0,0.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+/* Camera connection state indicators */
+.camera-status-indicator {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  transition: all 0.3s ease;
+} 

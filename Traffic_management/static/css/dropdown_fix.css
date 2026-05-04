@@ -1,0 +1,58 @@
+/**
+ * Minimalist Dropdown CSS Fixes
+ * Focused on solving only the critical issues without side effects
+ */
+
+/* Core fixes for dropdowns */
+.dropdown-menu {
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1000;
+    min-width: 10rem;
+    padding: 0.5rem 0;
+    margin: 0;
+    background-color: #fff;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.25rem;
+    transition: opacity 0.15s ease-in-out;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Ensure proper dropdown menu visibility */
+.navbar,
+.navbar-collapse,
+.dropdown,
+.dropdown-toggle {
+    overflow: visible !important;
+}
+
+/* Fix for user dropdown alignment */
+.dropdown-menu-end {
+    right: 0 !important;
+    left: auto !important;
+}
+
+/* Dropdown item spacing */
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.25rem 1rem;
+    clear: both;
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+}
+
+/* Fix for mobile navbar */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        max-height: 90vh;
+        overflow-y: auto !important;
+    }
+} 

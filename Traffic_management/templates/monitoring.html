@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Traffic Monitoring</title>
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="overflow: visible !important;">
+        <div class="container-fluid" style="overflow: visible !important;">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="bi bi-traffic-light me-2"></i>TSCS Dashboard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'monitoring' %}">Monitoring</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'settings' %}">Settings</a></li>
+                </ul>
+                <a href="{% url 'logout' %}" class="btn btn-outline-light">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <section class="mb-5">
+            <div class="dashboard-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-camera-video me-2"></i>Live Traffic Monitoring</h5>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="refreshFeeds">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                        </button>
+                        <button type="button" class="btn btn-outline-warning btn-sm" id="toggleAlerts">
+                            <i class="bi bi-bell me-1"></i>Alerts
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="alert alert-info d-flex align-items-center mb-4">
+                        <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                        <div>Live camera feeds and traffic status are updated in real time.</div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body text-center">
+                                    <div class="display-5 mb-2 text-primary"><i class="bi bi-car-front"></i></div>
+                                    <h6 class="card-title">Total Vehicles</h6>
+                                    <h3 id="totalVehicles" class="mb-0">-</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body text-center">
+                                    <div class="display-5 mb-2 text-success"><i class="bi bi-speedometer2"></i></div>
+                                    <h6 class="card-title">Average Speed</h6>
+                                    <h3 id="avgSpeed" class="mb-0">-</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body text-center">
+                                    <div class="display-5 mb-2 text-warning"><i class="bi bi-activity"></i></div>
+                                    <h6 class="card-title">Congestion</h6>
+                                    <h3 id="congestionLevel" class="mb-0">-</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body text-center">
+                                    <div class="display-5 mb-2 text-danger"><i class="bi bi-exclamation-triangle"></i></div>
+                                    <h6 class="card-title">Incidents</h6>
+                                    <h3 id="incidentCount" class="mb-0">-</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-center p-4 bg-primary text-white">
+                                    <i class="bi bi-arrow-up-circle fs-1 mb-2"></i>
+                                    <h6>Northbound</h6>
+                                    <h3 id="northCount">-</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-center p-4 bg-success text-white">
+                                    <i class="bi bi-arrow-up-circle fs-1 mb-2"></i>
+                                    <h6>Southbound</h6>
+                                    <h3 id="southCount">-</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-center p-4 bg-warning text-dark">
+                                    <i class="bi bi-arrow-up-circle fs-1 mb-2"></i>
+                                    <h6>Eastbound</h6>
+                                    <h3 id="eastCount">-</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-center p-4 bg-danger text-white">
+                                    <i class="bi bi-arrow-up-circle fs-1 mb-2"></i>
+                                    <h6>Westbound</h6>
+                                    <h3 id="westCount">-</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Traffic Flow Chart</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="trafficFlowChart" height="120"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-lg-8">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Live Camera Feed</h5>
+                                    <span class="badge bg-success">Online</span>
+                                </div>
+                                <div class="card-body p-0">
+                                    <video class="w-100 rounded-bottom" controls autoplay muted loop>
+                                        <source src="{% static 'videos/simulation2.mp4' %}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Recent Alerts</h5>
+                                </div>
+                                <div class="card-body" id="alertsBox">
+                                    <div class="alert alert-warning mb-2">Traffic is moderate on Southbound.</div>
+                                    <div class="alert alert-danger mb-2">Incident detected near Main Intersection.</div>
+                                    <div class="alert alert-info mb-0">Monitoring system active.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script>
+        let trafficChart;
+
+        function congestionColor(level) {
+            level = (level || '').toLowerCase();
+            if (level === 'low') return 'success';
+            if (level === 'moderate') return 'warning';
+            if (level === 'high') return 'danger';
+            return 'secondary';
+        }
+
+        function updateMonitoring() {
+            fetch('/api/traffic-data/real_time/')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('totalVehicles').textContent = data.current_flow.total_vehicles;
+                    document.getElementById('avgSpeed').textContent = data.current_flow.average_per_direction;
+                    document.getElementById('congestionLevel').innerHTML =
+                        `<span class="badge bg-${congestionColor(data.current_flow.congestion_level)}">${data.current_flow.congestion_level}</span>`;
+                    document.getElementById('incidentCount').textContent = data.incident_count || 0;
+
+                    document.getElementById('northCount').textContent = data.direction_status.northbound.vehicle_count;
+                    document.getElementById('southCount').textContent = data.direction_status.southbound.vehicle_count;
+                    document.getElementById('eastCount').textContent = data.direction_status.eastbound.vehicle_count;
+                    document.getElementById('westCount').textContent = data.direction_status.westbound.vehicle_count;
+
+                    const labels = ['Northbound', 'Southbound', 'Eastbound', 'Westbound'];
+                    const counts = [
+                        data.direction_status.northbound.vehicle_count,
+                        data.direction_status.southbound.vehicle_count,
+                        data.direction_status.eastbound.vehicle_count,
+                        data.direction_status.westbound.vehicle_count
+                    ];
+
+                    if (!trafficChart) {
+                        trafficChart = new Chart(document.getElementById('trafficFlowChart'), {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Vehicles',
+                                    data: counts,
+                                    backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545']
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false
+                            }
+                        });
+                    } else {
+                        trafficChart.data.datasets[0].data = counts;
+                        trafficChart.update();
+                    }
+                });
+        }
+
+        document.getElementById('refreshFeeds').addEventListener('click', updateMonitoring);
+        updateMonitoring();
+        setInterval(updateMonitoring, 5000);
+    </script>
+</body>
+</html>

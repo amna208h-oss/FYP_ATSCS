@@ -1,0 +1,190 @@
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.conf import settings
+from django.core.mail import EmailMessage
+from django.utils import timezone
+from django.urls import reverse
+from traffic.models import PasswordReset, UserProfile
+from traffic.forms import UserProfileForm
+from django.http import JsonResponse
+
+@login_required
+def index(request):
+    return render(request, 'index.html')
+
+def register(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        password2 = request.POST.get('password2')
+
+        user_data_has_error = False
+
+        if User.objects.filter(username=username).exists():
+            user_data_has_error = True
+            messages.error(request, "Username already taken")
+        if User.objects.filter(email=email).exists():
+            user_data_has_error = True
+            messages.error(request, "This email already exists")
+        if len(password) < 5:
+            user_data_has_error = True
+            messages.error(request, "Password must be at least 5 characters")
+        if password != password2:
+            user_data_has_error = True
+            messages.error(request, "Passwords do not match")
+        
+        if user_data_has_error:
+            return redirect('register')
+        else:
+            new_user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password
+            )
+            messages.success(request, "Account created. Please login now")
+            return redirect('login')
+
+    return render(request, 'register.html')
+
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            messages.error(request, "Invalid login credentials")
+            return redirect('login')
+
+    return render(request, 'login.html')
+
+def logout_view(request):
+    logout(request)
+    messages.success(request, "You have been logged out successfully")
+    return redirect('login')
+
+def forgot_password(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+
+        try:
+            user = User.objects.get(email=email)
+            # Create a new reset id
+            new_password_reset = PasswordReset(user=user)
+            new_password_reset.save()
+
+            password_reset_url = reverse('reset-password', kwargs={'reset_id': new_password_reset.reset_id})
+            full_password_reset_url = f'{request.scheme}://{request.get_host()}{password_reset_url}'
+            
+            # Email body
+            email_body = f'Reset your password using the link below:\n\n{full_password_reset_url}'
+            
+            # Create message
+            email_message = EmailMessage(
+                'Reset Your Password',
+                email_body,
+                settings.EMAIL_HOST_USER,
+                [email],
+            )
+            email_message.fail_silently = True
+            email_message.send()
+            
+            return redirect('password-reset-sent', reset_id=new_password_reset.reset_id)
+
+        except User.DoesNotExist:
+            messages.error(request, f"No user with email '{email}' found")
+            return redirect('forgot-password')
+
+    return render(request, 'forgot_password.html')
+
+def password_reset_sent(request, reset_id):
+    if PasswordReset.objects.filter(reset_id=reset_id).exists():
+        return render(request, 'reset_password_sent.html')
+    else:
+        messages.error(request, 'Invalid reset id')
+        return redirect('forgot-password')
+
+def reset_password(request, reset_id):
+    try:
+        password_reset = PasswordReset.objects.get(reset_id=reset_id)
+        if request.method == "POST":
+            password = request.POST.get('password')
+            password2 = request.POST.get('password2')
+
+            passwords_have_error = False
+
+            if password != password2:
+                passwords_have_error = True
+                messages.error(request, 'Passwords do not match')
+            if len(password) < 5:
+                passwords_have_error = True
+                messages.error(request, "Password must be at least 5 characters")
+
+            expiration_time = password_reset.created_when + timezone.timedelta(minutes=10)
+            if timezone.now() > expiration_time:
+                passwords_have_error = True
+                messages.error(request, 'Reset link has expired')
+                password_reset.delete()
+
+            if not passwords_have_error:
+                user = password_reset.user
+                user.set_password(password)
+                user.save()
+
+                password_reset.delete()
+                messages.success(request, "Password reset. Please login with your new password")
+                return redirect('login')
+            else:
+                return redirect('reset-password', reset_id=reset_id)
+
+    except PasswordReset.DoesNotExist:
+        messages.error(request, 'Invalid reset id')
+        return redirect('forgot-password')
+
+    return render(request, 'reset_password.html')
+
+@login_required
+def profile(request):
+    try:
+        profile = request.user.profile
+    except UserProfile.DoesNotExist:
+        profile = UserProfile.objects.create(user=request.user)
+    
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('profile')
+    else:
+        form = UserProfileForm(instance=profile)
+    
+    context = {
+        'form': form,
+        'profile': profile
+    }
+    return render(request, 'profile.html', context)
+
+def traffic_data(request):
+    data = {
+        "trafficFlow": [45, 80, 120, 100, 60],
+        "emergencyVehiclesCount": 3,
+        "emergencyVehicles": [
+            {"name": "Ambulance 1", "location": "Main Street"},
+            {"name": "Ambulance 2", "location": "Downtown"},
+            {"name": "Ambulance 3", "location": "City Park"},
+        ],
+        "incidents": [2, 4, 3, 5],
+    }
+    return JsonResponse(data)
+
+def change_signal(request, signal_id):
+    # Logic to change traffic light signal
+    return JsonResponse({"success": True, "signal_id": signal_id}) 

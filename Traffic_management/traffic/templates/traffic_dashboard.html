@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Traffic Management Dashboard</h2>
+    
+    <!-- Real-time Traffic Status -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Real-time Traffic Status</h5>
+        </div>
+        <div class="card-body">
+            <div id="realTimeStatus">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Traffic Analysis -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Traffic Analysis</h5>
+        </div>
+        <div class="card-body">
+            <div id="trafficAnalysis">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Direction Distribution Chart -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Traffic Direction Distribution</h5>
+        </div>
+        <div class="card-body">
+            <canvas id="directionChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Function to format numbers
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Function to update real-time status
+    function updateRealTimeStatus() {
+        fetch('/api/traffic-data/real_time/')
+            .then(response => response.json())
+            .then(data => {
+                const statusHtml = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Current Flow</h6>
+                            <p>Total Vehicles: ${formatNumber(data.current_flow.total_vehicles)}</p>
+                            <p>Average per Direction: ${data.current_flow.average_per_direction}</p>
+                            <p>Congestion Level: <span class="badge bg-${getCongestionColor(data.current_flow.congestion_level)}">${data.current_flow.congestion_level}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Direction Status</h6>
+                            ${Object.entries(data.direction_status).map(([direction, status]) => `
+                                <p>${direction.charAt(0).toUpperCase() + direction.slice(1)}: 
+                                   ${status.vehicle_count} vehicles 
+                                   <span class="badge bg-${getCongestionColor(status.congestion_level)}">${status.congestion_level}</span>
+                                </p>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                document.getElementById('realTimeStatus').innerHTML = statusHtml;
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Function to update traffic analysis
+    function updateTrafficAnalysis() {
+        fetch('/api/traffic-data/analysis/')
+            .then(response => response.json())
+            .then(data => {
+                const analysisHtml = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>Overall Statistics</h6>
+                            <p>Total Vehicles: ${formatNumber(data.total_vehicles)}</p>
+                            <p>Average per Reading: ${data.average_vehicles_per_reading}</p>
+                            <p>Congestion Level: <span class="badge bg-${getCongestionColor(data.congestion_level)}">${data.congestion_level}</span></p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Peak Hours</h6>
+                            ${data.peak_hours.map(peak => `
+                                <p>${formatHour(peak.hour)}: ${Math.round(peak.average_vehicles)} vehicles</p>
+                            `).join('')}
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Predictions</h6>
+                            <p>Next Hour: ${data.predictions.next_hour} vehicles</p>
+                            <p>Expected Congestion: <span class="badge bg-${getCongestionColor(data.predictions.predicted_congestion)}">${data.predictions.predicted_congestion}</span></p>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('trafficAnalysis').innerHTML = analysisHtml;
+                updateDirectionChart(data.direction_distribution);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Function to get congestion level color
+    function getCongestionColor(level) {
+        switch(level.toLowerCase()) {
+            case 'low': return 'success';
+            case 'moderate': return 'warning';
+            case 'high': return 'danger';
+            case 'severe': return 'dark';
+            default: return 'secondary';
+        }
+    }
+
+    // Function to format hour
+    function formatHour(hour) {
+        return `${hour % 12 || 12}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
+    }
+
+    // Function to update direction chart
+    function updateDirectionChart(distribution) {
+        const ctx = document.getElementById('directionChart').getContext('2d');
+        if (window.directionChart) {
+            window.directionChart.destroy();
+        }
+        window.directionChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(distribution).map(dir => dir.charAt(0).toUpperCase() + dir.slice(1)),
+                datasets: [{
+                    label: 'Vehicles per Direction',
+                    data: Object.values(distribution),
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Update data every 30 seconds
+    updateRealTimeStatus();
+    updateTrafficAnalysis();
+    setInterval(updateRealTimeStatus, 30000);
+    setInterval(updateTrafficAnalysis, 30000);
+</script>
+{% endblock %} 

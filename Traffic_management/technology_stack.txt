@@ -1,0 +1,37 @@
+# Smart Traffic Management System - Technology Stack
+
+## Backend
+- **Django 4.2.7**: Python web framework for rapid development
+- **Django REST Framework 3.14.0**: Toolkit for building Web APIs
+- **Channels 4.0.0**: Django library for handling WebSockets
+- **Redis 5.0.1**: In-memory data structure store used for caching and message broker
+- **Python 3.x**: Programming language
+
+## Frontend
+- **HTML5/CSS3**: Standard web technologies
+- **Bootstrap 5.3**: CSS framework for responsive design
+- **JavaScript**: Programming language for client-side functionality
+- **Chart.js**: JavaScript library for creating interactive charts and data visualizations
+
+## Data Visualization & Export
+- **jsPDF**: Client-side JavaScript PDF generation
+- **jsPDF-AutoTable**: Plugin for creating tables in PDFs with jsPDF
+- **XLSX.js**: JavaScript library for Excel file generation
+- **Bootstrap Icons**: Icon library for the UI
+
+## Database
+- **SQLite3**: Lightweight SQL database for development
+
+## Authentication & Security
+- **Django Authentication**: User management and authentication
+- **Django's CSRF Protection**: Cross-site request forgery protection
+
+## Communications
+- **WebSockets**: Real-time bidirectional communication
+- **Django Channels**: For handling WebSocket connections
+- **SMTP**: Email notifications via Django's email backend
+
+## Deployment
+- **WSGI/ASGI**: Web server gateway interfaces for deploying Django applications
+
+This technology stack provides a robust foundation for building a modern, responsive, and real-time traffic management system with data visualization capabilities. 

@@ -1,0 +1,3013 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="origin-trial" content="autoplay-without-user-gesture">
+    <meta http-equiv="Feature-Policy" content="autoplay 'self'">
+    <title>Smart Traffic Management System</title>
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij48cmVjdCB4PSIyIiB5PSIxIiB3aWR0aD0iMTIiIGhlaWdodD0iMTQiIHJ4PSIyIiBmaWxsPSIjMzMzIi8+PGNpcmNsZSBjeD0iOCIgY3k9IjQiIHI9IjIiIGZpbGw9IiNmMDAiLz48Y2lyY2xlIGN4PSI4IiBjeT0iOCIgcj0iMiIgZmlsbD0iI2ZmMCIvPjxjaXJjbGUgY3g9IjgiIGN5PSIxMiIgcj0iMiIgZmlsbD0iIzBmMCIvPjwvc3ZnPg==" type="image/svg+xml">
+    {% load static %}
+    
+    <!-- CSS Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dropdown_fix.css' %}">
+    
+    <!-- Core JS Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/dropdown_fix.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Chart.js Canvas Fix -->
+    <script>
+      (function() {
+        console.log("Applying Chart.js canvas conflict fix");
+        
+        // Store a reference to original Chart
+        const OriginalChart = window.Chart;
+        
+        // Track chart instances by canvas ID
+        window.chartInstances = {};
+        
+        // Override Chart constructor
+        window.Chart = function(canvas, config) {
+          // Resolve canvas element
+          const canvasElement = typeof canvas === 'string' ? document.getElementById(canvas) : canvas;
+          
+          if (!canvasElement) {
+            console.error('Canvas element not found:', canvas);
+            return null;
+          }
+          
+          const canvasId = canvasElement.id || 'unnamed-canvas';
+          
+          // Force cleanup any existing chart on this canvas
+          try {
+            // First try Chart.js's own registry
+            if (OriginalChart.getChart) {
+              const existingChart = OriginalChart.getChart(canvasElement);
+              if (existingChart) {
+                console.log(`[ChartFix] Destroying existing chart on ${canvasId}`);
+                existingChart.destroy();
+              }
+            }
+            
+            // Also check our own registry
+            if (window.chartInstances[canvasId]) {
+              console.log(`[ChartFix] Destroying tracked chart on ${canvasId}`);
+              try {
+                window.chartInstances[canvasId].destroy();
+              } catch (e) {
+                console.warn(`[ChartFix] Error destroying tracked chart:`, e);
+              }
+              delete window.chartInstances[canvasId];
+            }
+            
+            // Force replace canvas with a new one
+            const parent = canvasElement.parentNode;
+            if (parent) {
+              // Create a new canvas
+              const newCanvas = document.createElement('canvas');
+              newCanvas.id = canvasId;
+              newCanvas.className = canvasElement.className;
+              newCanvas.style.cssText = canvasElement.style.cssText;
+              newCanvas.width = canvasElement.width;
+              newCanvas.height = canvasElement.height;
+              
+              // Replace old canvas with new one
+              parent.removeChild(canvasElement);
+              parent.appendChild(newCanvas);
+              console.log(`[ChartFix] Replaced canvas ${canvasId} with a fresh element`);
+              
+              // Update reference for chart creation
+              canvas = newCanvas;
+            }
+          } catch (e) {
+            console.warn('[ChartFix] Error cleaning up canvas:', e);
+          }
+          
+          // Create new chart with fixed canvas
+          console.log(`[ChartFix] Creating new chart on ${canvasId}`);
+          const chart = new OriginalChart(canvas, config);
+          
+          // Store in our registry
+          if (chart && canvasId) {
+            window.chartInstances[canvasId] = chart;
+          }
+          
+          return chart;
+        };
+        
+        // Copy all static properties from original Chart
+        Object.keys(OriginalChart).forEach(key => {
+          if (key !== 'prototype' && key !== 'constructor') {
+            window.Chart[key] = OriginalChart[key];
+          }
+        });
+        
+        // Copy prototype methods
+        window.Chart.prototype = OriginalChart.prototype;
+        
+        // Enhance getChart to be more resilient
+        const origGetChart = OriginalChart.getChart;
+        window.Chart.getChart = function(canvas) {
+          try {
+            // First try original method
+            return origGetChart(canvas);
+          } catch (e) {
+            // Fallback to our registry
+            const canvasId = typeof canvas === 'string' ? canvas : (canvas ? canvas.id : null);
+            if (canvasId && window.chartInstances[canvasId]) {
+              return window.chartInstances[canvasId];
+            }
+            return null;
+          }
+        };
+        
+        console.log("[ChartFix] Chart.js patched successfully");
+      })();
+    </script>
+    
+    <!-- Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="{% static 'js/time_range_chart.js' %}"></script>
+    <script src="{% static 'js/fix_recursion.js' %}"></script>
+    <script src="{% static 'js/traffic_controls.js' %}"></script>
+    <script src="{% static 'js/video_controls.js' %}"></script>
+    <script src="{% static 'js/report.js' %}"></script>
+    <script src="{% static 'js/traffic-reports-api.js' %}"></script>
+    <script src="{% static 'js/export_functions.js' %}"></script>
+    <script src="{% static 'js/chart_export_functions.js' %}"></script>
+    <script src="{% static 'js/responsive_handlers.js' %}"></script>
+    <script src="{% static 'js/reset_charts.js' %}"></script>
+    <script src="{% static 'js/fix_chart_reattach.js' %}"></script>
+    <script src="{% static 'js/fix_comparison_charts.js' %}"></script>
+    <script src="{% static 'js/debug.js' %}"></script>
+    <script src="{% static 'js/theme_switcher.js' %}"></script>
+    <script src="{% static 'js/settings_handler.js' %}"></script>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script src="{% static 'js/comparison_charts_fix.js' %}"></script>
+  </head>
+  <body>
+    <!-- Prevent navbar scrollbar script -->
+    <script>
+      // Execute immediately 
+      (function() {
+        function removeScrollbars() {
+          // Fix navbar scrollbar issues
+          const elements = [
+            document.querySelector('.navbar'),
+            document.querySelector('.navbar .container-fluid'),
+            document.querySelector('.navbar-collapse'),
+            ...document.querySelectorAll('.dropdown-menu')
+          ].filter(el => el); // Filter out null elements
+          
+          elements.forEach(el => {
+            el.style.setProperty('overflow', 'visible', 'important');
+            el.style.setProperty('overflow-x', 'visible', 'important');
+            el.style.setProperty('overflow-y', 'visible', 'important');
+            el.style.setProperty('max-height', 'none', 'important');
+          });
+        }
+        
+        // Run immediately and after page load
+        removeScrollbars();
+        window.addEventListener('DOMContentLoaded', removeScrollbars);
+        window.addEventListener('load', removeScrollbars);
+        
+        // Set interval to continuously check for scrollbars in the first few seconds
+        let count = 0;
+        const interval = setInterval(() => {
+          removeScrollbars();
+          count++;
+          if (count > 10) clearInterval(interval);
+        }, 200);
+      })();
+    </script>
+    <!-- Alert Override - Must be at the top of the body -->
+    <script>
+      // Toast container
+      const toastContainerDiv = document.createElement('div');
+      toastContainerDiv.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+      toastContainerDiv.style.zIndex = '9999';
+      document.body.appendChild(toastContainerDiv);
+      
+      // Function to show toast notification
+      window.showToast = function(message, type = 'info') {
+        // Create toast element
+        const toastId = 'toast-' + Date.now();
+        const toastElement = document.createElement('div');
+        toastElement.classList.add('toast');
+        toastElement.setAttribute('id', toastId);
+        toastElement.setAttribute('role', 'alert');
+        toastElement.setAttribute('aria-live', 'assertive');
+        toastElement.setAttribute('aria-atomic', 'true');
+        
+        // Determine color based on type
+        const bgColor = type === 'success' ? 'bg-success' : 
+                        type === 'error' || type === 'danger' ? 'bg-danger' : 
+                        type === 'warning' ? 'bg-warning' : 'bg-info';
+        
+        // Set icon based on type
+        const icon = type === 'success' ? 'bi-check-circle-fill' : 
+                    type === 'error' || type === 'danger' ? 'bi-exclamation-circle-fill' : 
+                    type === 'warning' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill';
+        
+        // Create toast content
+        toastElement.innerHTML = `
+          <div class="toast-header ${bgColor} text-white">
+            <i class="bi ${icon} me-2"></i>
+            <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
+            <small>just now</small>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">
+            ${message}
+          </div>
+        `;
+        
+        // Add toast to container
+        const toastContainer = document.querySelector('.toast-container');
+        if (toastContainer) {
+          toastContainer.appendChild(toastElement);
+          
+          // Initialize and show toast
+          const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 5000
+          });
+          toast.show();
+          
+          // Remove toast element after it's hidden
+          toastElement.addEventListener('hidden.bs.toast', function () {
+            toastElement.remove();
+          });
+        } else {
+          console.error("Toast container not found");
+        }
+      };
+      
+      // Override the default alert function to use our toast notifications
+      // This will catch any alerts from external JS files
+      window.originalAlert = window.alert;
+      window.alert = function(message) {
+        console.log("Alert intercepted:", message);
+        window.showToast(message, "info");
+        // Don't call the original alert to avoid showing both notifications
+        // window.originalAlert(message);
+        return true; // Return true to mimic alert's return value
+      };
+    </script>
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="overflow: visible !important;">
+      <div class="container-fluid" style="overflow: visible !important;">
+        <a class="navbar-brand" href="#">
+          <i class="bi bi-traffic-light me-2"></i>
+          TSCS Dashboard
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link active" href="#home">
+                <i class="bi bi-house-door me-1"></i> Home
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#monitoring">
+                <i class="bi bi-graph-up me-1"></i> Monitoring
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#settings">
+                <i class="bi bi-gear me-1"></i> Settings
+              </a>
+            </li>
+            <!-- <li class="nav-item">
+              <a class="nav-link" href="#reports">
+                <i class="bi bi-file-earmark-text me-1"></i> Reports
+              </a>
+            </li> -->
+          </ul>
+          <div class="d-flex align-items-center">
+            <div class="dropdown me-3">
+                            <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">                {% if user.profile and user.profile.profile_picture %}                <img src="{{ user.profile.profile_picture.url }}" class="rounded-circle me-2" width="30" height="30" alt="{{ user.username }}">                {% else %}                <i class="bi bi-person-circle me-2"></i>                {% endif %}                <span id="username">{{ user.username }}</span>              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" style="overflow: visible !important; max-height: none !important; height: auto !important; z-index: 9999 !important; position: absolute !important; transform: none !important; margin: 0 !important; margin-top: 0.25rem !important;">
+                <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'logout' %}" id="logoutBtn"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+              </ul>
+            </div>
+           
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+      <!-- Add responsive styles specifically for main container content -->
+      <style>
+        /* General responsive fixes */
+        .main-container .dashboard-card {
+          overflow-x: hidden;
+        }
+        
+        .main-container .table-responsive {
+          min-height: 0.01%;
+          overflow-x: auto;
+        }
+        
+        /* Responsive grid and card adjustments */
+        @media (max-width: 991.98px) {
+          .main-container .row {
+            margin-left: -10px;
+            margin-right: -10px;
+          }
+          
+          .main-container .row > [class*="col-"] {
+            padding-left: 10px;
+            padding-right: 10px;
+          }
+          
+          .main-container .stat-card {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+          }
+          
+          .main-container .card-body {
+            padding: 0.75rem;
+          }
+          
+          .main-container .chart-container {
+            height: 250px !important;
+          }
+          
+          .main-container .camera-view {
+            margin-bottom: 1rem;
+          }
+        }
+        
+        /* Mobile adjustments */
+        @media (max-width: 767.98px) {
+          .main-container .row {
+            margin-left: -5px;
+            margin-right: -5px;
+          }
+          
+          .main-container .row > [class*="col-"] {
+            padding-left: 5px;
+            padding-right: 5px;
+          }
+          
+          .main-container .card-header {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start !important;
+            padding: 0.75rem;
+          }
+          
+          .main-container .card-header h5 {
+            margin-bottom: 0.5rem;
+          }
+          
+          .main-container .card-header .btn-group {
+            margin-top: 0.5rem;
+            display: flex;
+            width: 100%;
+          }
+          
+          .main-container .card-header .btn-group .btn {
+            flex: 1;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+          }
+          
+          .main-container .stat-value {
+            font-size: 1.25rem;
+          }
+          
+          .main-container .chart-container {
+            height: 200px !important;
+          }
+          
+          /* Fix for camera layout */
+          .main-container .camera-feed-container {
+            margin-bottom: 1.5rem;
+          }
+          
+          .main-container .camera-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+          }
+          
+          .main-container .camera-header .camera-controls {
+            margin-top: 0.5rem;
+            width: 100%;
+            justify-content: flex-start;
+          }
+          
+          /* Fix for video controls */
+          .main-container .video-controls .btn {
+            padding: 0.2rem 0.3rem;
+            font-size: 0.75rem;
+          }
+        }
+        
+        /* Extra small screens */
+        @media (max-width: 575.98px) {
+          .main-container .col-md-3,
+          .main-container .col-md-4,
+          .main-container .col-md-6,
+          .main-container .col-md-8,
+          .main-container .col-md-12 {
+            width: 100%;
+            flex: 0 0 100%;
+            max-width: 100%;
+          }
+          
+          .main-container .card-header .btn-group {
+            flex-wrap: wrap;
+          }
+          
+          .main-container .card-header .btn-group .btn {
+            margin-bottom: 0.25rem;
+          }
+          
+          .main-container .traffic-analytics-snapshot {
+            flex-direction: column;
+          }
+          
+          .main-container .traffic-analytics-snapshot > div {
+            margin-bottom: 0.5rem;
+            width: 100%;
+          }
+          
+          /* Adjust incidents table for better mobile viewing */
+          .main-container .incidents-table th,
+          .main-container .incidents-table td {
+            padding: 0.4rem 0.25rem;
+            font-size: 0.75rem;
+          }
+          
+          .main-container .incidents-table .btn-group {
+            flex-direction: column;
+          }
+          
+          .main-container .incidents-table .btn-group .btn {
+            margin-right: 0;
+            margin-bottom: 0.125rem;
+            border-radius: 0.25rem !important;
+          }
+        }
+
+        @media (min-width: 768px) {
+          .camera-grid-row {
+            display: flex;
+            flex-direction: row;
+          }
+          .camera-grid-row > .directional-column {
+            order: 1;
+          }
+          .camera-grid-row > .main-column {
+            order: 2;
+          }
+        }
+
+        /* Mobile layout - main video below the directional videos */
+        @media (max-width: 767.98px) {
+          .camera-grid-row {
+            display: flex;
+            flex-direction: column;
+          }
+          .camera-grid-row > .directional-column {
+            order: 1;
+          }
+          .camera-grid-row > .main-column {
+            order: 2;
+          }
+        }
+      </style>
+      
+      <!-- Dashboard Section -->
+      <section id="home" class="mb-5">
+        <div class="row mb-4">
+          <div class="col-md-12">
+            <div class="dashboard-card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="bi bi-graph-up me-2"></i>Traffic Flow Analysis</h5>
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-primary btn-sm me-2" id="viewDashboardBtn">
+                    <i class="bi bi-speedometer2 me-1"></i>View Dashboard
+                  </button>
+                  <div class="dropdown d-inline-block">
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-download me-1"></i>Export
+                  </button>
+                    <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                      <li><a class="dropdown-item" href="#" id="dashboardExportCSV"><i class="bi bi-filetype-csv me-2"></i>CSV</a></li>
+                      <li><a class="dropdown-item" href="#" id="dashboardExportExcel"><i class="bi bi-file-excel me-2"></i>Excel</a></li>
+                      <li><a class="dropdown-item" href="#" id="dashboardExportPDF"><i class="bi bi-file-pdf me-2"></i>PDF</a></li>
+                    </ul>
+                  </div>
+                  <button type="button" class="btn btn-outline-primary" id="compareData">
+                    <i class="bi bi-graph-up me-1"></i>Compare
+                  </button>
+                  <button type="button" class="btn btn-outline-warning" id="forceInitChart">
+                    <i class="bi bi-arrow-repeat me-1"></i>Refresh Chart
+                  </button>
+                  <button type="button" class="btn btn-outline-danger" id="debugChartBtn" title="Debug traffic charts">
+                    <i class="bi bi-bug me-1"></i>Debug
+                  </button>
+                  <div class="form-check form-switch ms-3 d-inline-block">
+                    <input class="form-check-input" type="checkbox" id="predictionToggle">
+                    <label class="form-check-label predict-color" for="predictionToggle">Predictions</label>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <!-- Time Range Controls -->
+                <div class="d-flex justify-content-center mb-4">
+                  <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary" data-range="30">30 min</button>
+                    <button type="button" class="btn btn-outline-primary" data-range="60">1 hour</button>
+                    <button type="button" class="btn btn-outline-primary" data-range="180">3 hours</button>
+                    <button type="button" class="btn btn-outline-primary" data-range="360">6 hours</button>
+                    <button type="button" class="btn btn-outline-primary" id="customRangeBtn">
+                      <i class="bi bi-calendar me-1"></i>Custom
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Main Traffic Chart -->
+                <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                  <canvas id="trafficFlowChart"></canvas>
+                </div>
+
+            
+
+                <!-- Traffic Statistics -->
+                <div class="row g-4 mb-4">
+                  <div class="col-md-3">
+                    <div class="stat-card">
+                      <div class="stat-title">Average Traffic</div>
+                      <div class="stat-value" id="avgTraffic">0 vehicles/min</div>
+                      <div class="stat-trend" id="trafficTrend">No trend data</div>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="stat-card">
+                      <div class="stat-title">Peak Time</div>
+                      <div class="stat-value" id="peakTime">-</div>
+                      <div class="stat-trend" id="peakTrend">No trend data</div>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="stat-card">
+                      <div class="stat-title">Total Vehicles</div>
+                      <div class="stat-value" id="totalVehicles">0</div>
+                      <div class="stat-trend" id="totalTrend">No trend data</div>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="stat-card">
+                      <div class="stat-title">Current Status</div>
+                      <div class="stat-value">
+                        <span class="badge bg-success status-badge">Smooth</span>
+                      </div>
+                      <div class="stat-trend" id="statusTrend">No trend data</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Detailed Analysis -->
+                <div class="row g-4">
+                  <div class="col-md-4">
+                    <div class="analysis-section">
+                      <h6 class="mb-3"><i class="bi bi-pie-chart me-2"></i>Traffic Distribution</h6>
+                      <div class="chart-wrapper" style="height: 200px; position: relative;">
+                        <canvas id="distributionChart"></canvas>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="analysis-section">
+                      <h6 class="mb-3"><i class="bi bi-clock-history me-2"></i>Hourly Pattern</h6>
+                      <div class="chart-wrapper" style="height: 200px; position: relative;">
+                        <canvas id="hourlyPatternChart"></canvas>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="analysis-section">
+                      <h6 class="mb-3"><i class="bi bi-arrow-left-right me-2"></i>Direction Analysis</h6>
+                      <div class="direction-stats">
+                        <p>Northbound: <span id="northboundStats">0%</span></p>
+                        <p>Southbound: <span id="southboundStats">0%</span></p>
+                        <p>Peak Direction: <span id="peakDirection">-</span></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Monitoring Section -->
+     <!-- Monitoring Section -->
+     <section id="monitoring" class="mb-5">
+      <div class="dashboard-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5><i class="bi bi-camera-video me-2"></i>Live Traffic Monitoring</h5>
+          <div class="btn-group" role="group">
+            <!-- Removed View and Position buttons -->
+            <button type="button" class="btn btn-outline-primary" id="refreshFeeds" title="Refresh all cameras">
+              <i class="bi bi-arrow-clockwise me-1"></i>
+              <span class="d-none d-md-inline">Refresh</span>
+            </button>
+            <button type="button" class="btn btn-outline-primary" id="toggleAlerts" title="Show/hide alerts">
+              <i class="bi bi-bell me-1"></i>
+              <span class="d-none d-md-inline">Alerts</span>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger camera-alert-badge" style="font-size: 0.6rem; display: none;">
+                <span class="camera-alert-count">0</span>
+                <span class="visually-hidden">unread alerts</span>
+              </span>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Camera Feeds Grid -->
+          <div class="row g-4 mb-4" style="display: flex; flex-wrap: wrap;">
+            <!-- Left Column - Directional Cameras -->
+            <div class="col-md-4">
+              <!-- North Bound -->
+              <div class="camera-feed-container mb-4">
+                <div class="camera-header d-flex justify-content-between align-items-center mb-3">
+                  <div class="d-flex align-items-center">
+                    <h6 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Northbound</h6>
+                    <span class="badge ms-2 camera-status-indicator" data-status="offline">Offline</span>
+                    <span class="badge bg-secondary ms-2" title="Traffic flow">
+                      <i class="bi bi-car-front me-1"></i><span>0</span>
+                      </span>
+                  </div>
+                  <div class="camera-controls d-flex">
+                   
+                    <button type="button" class="btn btn-sm btn-outline-secondary btn-camera-stream-toggle" data-camera-id="north" title="Connect/Disconnect">
+                      <i class="bi bi-play-fill"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="camera-view ratio ratio-16x9 position-relative">
+                  <div class="camera-stream position-absolute top-0 start-0 w-100 h-100">
+                    <video id="northVideo" class="w-100 h-100 object-fit-cover" autoplay loop muted playsinline>
+                      <source src="{% static 'videos/north.mp4' %}" type="video/mp4">
+                      <!-- Fallback if video fails to load -->
+                    <div class="camera-fallback d-flex flex-column justify-content-center align-items-center text-center p-3 h-100 w-100">
+                      <i class="bi bi-camera-video-off text-secondary mb-2" style="font-size: 2rem;"></i>
+                        <h6 class="text-secondary">Video failed to load</h6>
+                      <button class="btn btn-sm btn-primary btn-reconnect">
+                          <i class="bi bi-arrow-repeat me-1"></i>Retry
+                      </button>
+                    </div>
+                    </video>
+                    
+                    <!-- Video Controls Overlay -->
+                    <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75" style="z-index: 95;">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <button class="btn btn-sm btn-outline-light me-2 play-pause-btn" data-video="north">
+                            <i class="bi bi-pause-fill"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-light me-2 mute-btn" data-video="north">
+                            <i class="bi bi-volume-mute-fill"></i>
+                          </button>
+                        </div>
+                        <div class="flex-grow-1 mx-3">
+                          <input type="range" class="form-range video-progress" data-video="north" min="0" value="0" step="0.1">
+                        </div>
+                        <div>
+                          <button class="btn btn-sm btn-outline-light fullscreen-btn" data-video="north">
+                            <i class="bi bi-fullscreen"></i>
+                          </button>
+                        </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <div class="d-flex align-items-center justify-content-between mt-1">
+                  <small class="text-muted">Flow Status:</small>
+                  <div class="progress flex-grow-1 mx-2" style="height: 6px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 25%"></div>
+                      </div>
+                  <small class="text-success">Normal</small>
+                    </div>
+                  </div>
+                  
+              <!-- South Bound -->
+              <div class="camera-feed-container mb-4">
+                <div class="camera-header d-flex justify-content-between align-items-center mb-3">
+                  <div class="d-flex align-items-center">
+                    <h6 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Southbound</h6>
+                    <span class="badge ms-2 camera-status-indicator" data-status="offline">Offline</span>
+                    <span class="badge bg-secondary ms-2" title="Traffic flow">
+                      <i class="bi bi-car-front me-1"></i><span>0</span>
+                    </span>
+                  </div>
+                  <div class="camera-controls d-flex">
+                    
+                    <button type="button" class="btn btn-sm btn-outline-secondary btn-camera-stream-toggle" data-camera-id="south" title="Connect/Disconnect">
+                      <i class="bi bi-play-fill"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="camera-view ratio ratio-16x9 position-relative">
+                  <div class="camera-stream position-absolute top-0 start-0 w-100 h-100">
+                    <video id="southVideo" class="w-100 h-100 object-fit-cover" autoplay loop muted playsinline>
+                      <source src="{% static 'videos/south.mp4' %}" type="video/mp4">
+                      <!-- Fallback if video fails to load -->
+                    <div class="camera-fallback d-flex flex-column justify-content-center align-items-center text-center p-3 h-100 w-100">
+                      <i class="bi bi-camera-video-off text-secondary mb-2" style="font-size: 2rem;"></i>
+                        <h6 class="text-secondary">Video failed to load</h6>
+                      <button class="btn btn-sm btn-primary btn-reconnect">
+                          <i class="bi bi-arrow-repeat me-1"></i>Retry
+                      </button>
+                    </div>
+                    </video>
+                    
+                    <!-- Video Controls Overlay -->
+                    <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75" style="z-index: 95;">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <button class="btn btn-sm btn-outline-light me-2 play-pause-btn" data-video="south">
+                            <i class="bi bi-pause-fill"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-light me-2 mute-btn" data-video="south">
+                            <i class="bi bi-volume-mute-fill"></i>
+                          </button>
+                      </div>
+                        <div class="flex-grow-1 mx-3">
+                          <input type="range" class="form-range video-progress" data-video="south" min="0" value="0" step="0.1">
+                    </div>
+                        <div>
+                          <button class="btn btn-sm btn-outline-light fullscreen-btn" data-video="south">
+                            <i class="bi bi-fullscreen"></i>
+                          </button>
+                  </div>
+                </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between mt-1">
+                  <small class="text-muted">Flow Status:</small>
+                  <div class="progress flex-grow-1 mx-2" style="height: 6px;">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: 60%"></div>
+                  </div>
+                  <small class="text-warning">Moderate</small>
+                </div>
+              </div>
+
+              <!-- East Bound -->
+              <div class="camera-feed-container mb-4">
+                <div class="camera-header d-flex justify-content-between align-items-center mb-3">
+                  <div class="d-flex align-items-center">
+                    <h6 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Eastbound</h6>
+                    <span class="badge ms-2 camera-status-indicator" data-status="offline">Offline</span>
+                    <span class="badge bg-secondary ms-2" title="Traffic flow">
+                      <i class="bi bi-car-front me-1"></i><span>0</span>
+                    </span>
+                  </div>
+                  <div class="camera-controls d-flex">
+                    
+                    <button type="button" class="btn btn-sm btn-outline-secondary btn-camera-stream-toggle" data-camera-id="east" title="Connect/Disconnect">
+                      <i class="bi bi-play-fill"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="camera-view ratio ratio-16x9 position-relative">
+                  <div class="camera-stream position-absolute top-0 start-0 w-100 h-100">
+                    <video id="eastVideo" class="w-100 h-100 object-fit-cover" autoplay loop muted playsinline>
+                      <source src="{% static 'videos/east.mp4' %}" type="video/mp4">
+                      <!-- Fallback if video fails to load -->
+                    <div class="camera-fallback d-flex flex-column justify-content-center align-items-center text-center p-3 h-100 w-100">
+                      <i class="bi bi-camera-video-off text-secondary mb-2" style="font-size: 2rem;"></i>
+                        <h6 class="text-secondary">Video failed to load</h6>
+                      <button class="btn btn-sm btn-primary btn-reconnect">
+                          <i class="bi bi-arrow-repeat me-1"></i>Retry
+                      </button>
+                    </div>
+                    </video>
+                    
+                    <!-- Video Controls Overlay -->
+                    <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75" style="z-index: 95;">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <button class="btn btn-sm btn-outline-light me-2 play-pause-btn" data-video="east">
+                            <i class="bi bi-pause-fill"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-light me-2 mute-btn" data-video="east">
+                            <i class="bi bi-volume-mute-fill"></i>
+                          </button>
+                      </div>
+                        <div class="flex-grow-1 mx-3">
+                          <input type="range" class="form-range video-progress" data-video="east" min="0" value="0" step="0.1">
+                        </div>
+                        <div>
+                          <button class="btn btn-sm btn-outline-light fullscreen-btn" data-video="east">
+                            <i class="bi bi-fullscreen"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between mt-1">
+                  <small class="text-muted">Flow Status:</small>
+                  <div class="progress flex-grow-1 mx-2" style="height: 6px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 15%"></div>
+                  </div>
+                  <small class="text-success">Low</small>
+                </div>
+              </div>
+
+              <!-- West Bound -->
+              <div class="camera-feed-container">
+                <div class="camera-header d-flex justify-content-between align-items-center mb-3">
+                  <div class="d-flex align-items-center">
+                    <h6 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Westbound</h6>
+                    <span class="badge ms-2 camera-status-indicator" data-status="offline">Offline</span>
+                    <span class="badge bg-secondary ms-2" title="Traffic flow">
+                      <i class="bi bi-car-front me-1"></i><span>0</span>
+                    </span>
+                  </div>
+                  <div class="camera-controls d-flex">
+                   
+                    <button type="button" class="btn btn-sm btn-outline-secondary btn-camera-stream-toggle" data-camera-id="west" title="Connect/Disconnect">
+                      <i class="bi bi-play-fill"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="camera-view ratio ratio-16x9 position-relative">
+                  <div class="camera-stream position-absolute top-0 start-0 w-100 h-100">
+                    <video id="westVideo" class="w-100 h-100 object-fit-cover" autoplay loop muted playsinline>
+                      <source src="{% static 'videos/west.mp4' %}" type="video/mp4">
+                      <!-- Fallback if video fails to load -->
+                    <div class="camera-fallback d-flex flex-column justify-content-center align-items-center text-center p-3 h-100 w-100">
+                      <i class="bi bi-camera-video-off text-secondary mb-2" style="font-size: 2rem;"></i>
+                        <h6 class="text-secondary">Video failed to load</h6>
+                      <button class="btn btn-sm btn-primary btn-reconnect">
+                          <i class="bi bi-arrow-repeat me-1"></i>Retry
+                      </button>
+                    </div>
+                    </video>
+                    
+                    <!-- Video Controls Overlay -->
+                    <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75" style="z-index: 95;">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <button class="btn btn-sm btn-outline-light me-2 play-pause-btn" data-video="west">
+                            <i class="bi bi-pause-fill"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-light me-2 mute-btn" data-video="west">
+                            <i class="bi bi-volume-mute-fill"></i>
+                          </button>
+                      </div>
+                        <div class="flex-grow-1 mx-3">
+                          <input type="range" class="form-range video-progress" data-video="west" min="0" value="0" step="0.1">
+                        </div>
+                        <div>
+                          <button class="btn btn-sm btn-outline-light fullscreen-btn" data-video="west">
+                            <i class="bi bi-fullscreen"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between mt-1">
+                  <small class="text-muted">Flow Status:</small>
+                  <div class="progress flex-grow-1 mx-2" style="height: 6px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: 85%"></div>
+                  </div>
+                  <small class="text-danger">High</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column - Main Intersection -->
+            <div class="col-md-8">
+              <div class="camera-feed-container main-camera">
+                <div class="camera-header d-flex justify-content-between align-items-center mb-3">
+                  <div class="d-flex align-items-center">
+                    <h6 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Main Intersection</h6>
+                    <span class="badge ms-2 camera-status-indicator" data-status="offline">Offline</span>
+                    <div class="ms-3 d-flex align-items-center">
+                      <span class="badge bg-info me-2" title="Current traffic flow">
+                        <i class="bi bi-car-front me-1"></i><span class="traffic-flow-count">0</span>/min
+                      </span>
+                      <span class="badge bg-success me-2" title="Traffic signal status">
+                        <i class="bi bi-traffic-light me-1"></i>Operational
+                    </span>
+                    </div>
+                  </div>
+                 
+                </div>
+                <div class="camera-view ratio ratio-16x9 position-relative">
+                  <div class="camera-stream position-absolute top-0 start-0 w-100 h-100">
+                    <!-- Replace fallback with video -->
+                    <video id="mainIntersectionVideo" class="w-100 h-100 object-fit-cover" autoplay loop muted playsinline>
+                      <source src="{% static 'videos/simulation2.mp4' %}" type="video/mp4">
+                      <!-- Fallback if video fails to load -->
+                    <div class="camera-fallback d-flex flex-column justify-content-center align-items-center text-center p-3 h-100 w-100">
+                      <i class="bi bi-camera-video-off text-secondary mb-2" style="font-size: 2rem;"></i>
+                        <h6 class="text-secondary">Video failed to load</h6>
+                      <button class="btn btn-sm btn-primary btn-reconnect">
+                          <i class="bi bi-arrow-repeat me-1"></i>Retry
+                      </button>
+                    </div>
+                    </video>
+                    
+                    <!-- Video Controls Overlay -->
+                    <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75" style="z-index: 95;">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <button class="btn btn-sm btn-outline-light me-2" id="playPauseBtn">
+                            <i class="bi bi-pause-fill"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-light me-2" id="muteBtn">
+                            <i class="bi bi-volume-mute-fill"></i>
+                          </button>
+                        </div>
+                        <div class="flex-grow-1 mx-3">
+                          <input type="range" class="form-range" id="videoProgress" min="0" value="0" step="0.1">
+                        </div>
+                        <div>
+                          <button class="btn btn-sm btn-outline-light" id="fullscreenBtn">
+                            <i class="bi bi-fullscreen"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="real-time-metrics position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75 text-white" style="display: none; z-index: 100;">
+                      <div class="d-flex justify-content-between">
+                        <div>
+                          <small><i class="bi bi-car-front me-1"></i>Vehicles: <span class="vehicle-count">0</span></small>
+                      </div>
+                        <div>
+                          <small><i class="bi bi-speedometer2 me-1"></i>Avg Speed: <span class="avg-speed">0</span> km/h</small>
+                    </div>
+                        <div>
+                          <small><i class="bi bi-exclamation-triangle me-1"></i>Incidents: <span class="incident-count">0</span></small>
+                  </div>
+                        <div>
+                          <small><i class="bi bi-clock me-1"></i><span class="current-time">00:00:00</span></small>
+                </div>
+                  </div>
+                    </div>
+                  </div>
+                  
+                  <div class="mini-map position-absolute top-0 end-0 m-2 rounded shadow-sm" style="width: 120px; height: 120px; background-color: #f8f9fa; border: 1px solid rgba(0,0,0,0.1); display: none; z-index: 100;">
+                    <div class="position-relative w-100 h-100 p-1">
+                      <div style="background-color: #ddd; width: 100%; height: 100%; border-radius: 2px;">
+                        <div class="position-absolute" style="top: 45%; left: 0; width: 100%; height: 10%; background-color: #555;"></div>
+                        <div class="position-absolute" style="top: 0; left: 45%; width: 10%; height: 100%; background-color: #555;"></div>
+                        <div class="position-absolute" style="top: 50%; left: 50%; width: 10px; height: 10px; background-color: #3498db; border-radius: 50%; transform: translate(-50%, -50%);"></div>
+                        <div class="position-absolute" style="top: 50%; left: 50%; width: 40px; height: 40px; border: 2px solid #3498db; border-radius: 50%; transform: translate(-50%, -50%);"></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="ai-detection-overlay position-absolute top-0 start-0 w-100 h-100" style="display: none; z-index: 90; pointer-events: none;">
+                    <div class="detection-box position-absolute" style="top: 40%; left: 30%; width: 50px; height: 25px; border: 2px solid #ff0000; border-radius: 2px;">
+                      <span class="badge bg-danger position-absolute" style="top: -20px; left: 0; font-size: 0.7rem;">Car: 95%</span>
+                    </div>
+                    <div class="detection-box position-absolute" style="top: 45%; left: 60%; width: 40px; height: 20px; border: 2px solid #00ff00; border-radius: 2px;">
+                      <span class="badge bg-success position-absolute" style="top: -20px; left: 0; font-size: 0.7rem;">Car: 92%</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="traffic-analytics-snapshot mt-2 p-2 rounded bg-light d-flex justify-content-between">
+                  <div class="text-center">
+                    <small class="d-block text-muted">Current Flow</small>
+                    <span class="fw-bold text-primary">34 veh/min</span>
+                  </div>
+                  <div class="text-center">
+                    <small class="d-block text-muted">Peak Time</small>
+                    <span class="fw-bold">08:15 - 09:30</span>
+                  </div>
+                  <div class="text-center">
+                    <small class="d-block text-muted">Congestion</small>
+                    <span class="fw-bold text-success">Low</span>
+                  </div>
+                  <div class="text-center">
+                    <small class="d-block text-muted">Signal Cycle</small>
+                    <span class="fw-bold">15 sec</span>
+                  </div>
+                  <div class="text-center">
+                    <small class="d-block text-muted">Detection</small>
+                    <span class="fw-bold">AI-powered</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Incident Logs - Enhanced -->
+          <div class="incident-logs mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0"><i class="bi bi-list-ul me-2"></i>Recent Incidents</h6>
+              <div>
+                <div class="btn-group me-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" id="filterIncidents">
+                    <i class="bi bi-funnel me-1"></i>Filter
+                  </button>
+                  {% comment %} <button type="button" class="btn btn-sm btn-outline-secondary" id="exportIncidents">
+                    <i class="bi bi-file-earmark-arrow-down me-1"></i>Export
+                  </button> {% endcomment %}
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="refreshIncidents">
+                  <i class="bi bi-arrow-repeat me-1"></i>Refresh
+                </button>
+              </div>
+            </div>
+            
+            <!-- Real-time Incident Banner -->
+            <div class="alert alert-danger d-flex align-items-center mb-3 position-relative overflow-hidden" role="alert">
+              <div class="position-absolute start-0 top-0 bottom-0 bg-danger" style="width: 4px;"></div>
+              <div class="d-flex align-items-center w-100 ps-3">
+                <div class="flex-shrink-0">
+                  <span class="badge bg-danger p-2 rounded-circle">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                  </span>
+                </div>
+                <div class="ms-3 me-auto">
+                  <div class="fw-bold">Active Incident: Traffic Accident</div>
+                  <small>Main Intersection - Emergency Services En Route</small>
+                </div>
+                <div class="ms-3 d-flex align-items-center">
+                  <div class="live-indicator me-2">
+                    <span class="badge bg-danger">LIVE</span>
+                  </div>
+                  <div class="incident-timer">
+                    <small class="text-muted">Started 8 min ago</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="table table-hover incidents-table table-responsive-stack">
+                <thead>
+                  <tr>
+                    <th style="width: 180px;">Date & Time</th>
+                    <th style="width: 120px;">Type</th>
+                    <th>Location</th>
+                    <th style="width: 100px;">Severity</th>
+                    <th style="width: 120px;">Status</th>
+                    <th style="width: 180px;">Response Time</th>
+                    <th style="width: 100px;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="bg-danger bg-opacity-10">
+                    <td data-label="Date & Time">
+                      
+                        
+                        <div>
+                          <span>2024-03-22 09:15</span>
+                          <small class="d-block text-muted" >8 minutes ago</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td data-label="Type">
+                      <span class="badge bg-danger text-white">
+                        <i class="bi bi-car-front-fill me-1"></i>Accident
+                      </span>
+                    </td>
+                    <td data-label="Location">
+                      
+                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                        <span>Main Intersection</span>
+                        <button class="btn btn-sm text-primary ms-2 p-0" title="View on map">
+                          <i class="bi bi-map"></i>
+                        </button>
+                      
+                    </td>
+                    <td data-label="Severity"><span class="badge bg-danger">High</span></td>
+                    <td data-label="Status">
+                      <span class="badge bg-warning text-dark">
+                        <i class="bi bi-hourglass-split me-1"></i>In Progress
+                      </span>
+                    </td>
+                    <td data-label="Response Time">
+                      
+                        <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                          <div class="progress-bar bg-success" role="progressbar" style="width: 80%;"></div>
+                        </div>
+                        <span>2:45</span>
+                      
+                    </td>
+                    <td data-label="Actions">
+                      <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-primary">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary">
+                          <i class="bi bi-camera-video"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"></button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-text me-2"></i>View Report</a></li>
+                          <li><a class="dropdown-item" href="#"><i class="bi bi-share me-2"></i>Share</a></li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li><a class="dropdown-item" href="#"><i class="bi bi-archive me-2"></i>Archive</a></li>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label="Date & Time">
+                      <div>
+                        <span>2024-03-21 17:45</span>
+                        <small class="d-block text-muted">Yesterday</small>
+                      </div>
+                    </td>
+                    <td data-label="Type">
+                      <span class="badge bg-warning text-dark">
+                        <i class="bi bi-exclamation-diamond-fill me-1"></i>Congestion
+                      </span>
+                    </td>
+                    <td data-label="Location">
+                      
+                        <i class="bi bi-geo-alt-fill text-warning me-1"></i>
+                        <span>Northbound Highway</span>
+                        <button class="btn btn-sm text-primary ms-2 p-0" title="View on map">
+                          <i class="bi bi-map"></i>
+                        </button>
+                      
+                    </td>
+                    <td data-label="Severity"><span class="badge bg-warning text-dark">Medium</span></td>
+                    <td data-label="Status">
+                      <span class="badge bg-success">
+                        <i class="bi bi-check-circle me-1"></i>Resolved
+                      </span>
+                    </td>
+                    <td data-label="Response Time">
+                      
+                        <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                          <div class="progress-bar bg-success" role="progressbar" style="width: 100%;"></div>
+                        </div>
+                        <span>5:30</span>
+                      
+                    </td>
+                    <td data-label="Actions">
+                      <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-primary">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary">
+                          <i class="bi bi-camera-video"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"></button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-text me-2"></i>View Report</a></li>
+                          <li><a class="dropdown-item" href="#"><i class="bi bi-share me-2"></i>Share</a></li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li><a class="dropdown-item" href="#"><i class="bi bi-archive me-2"></i>Archive</a></li>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label="Date & Time">
+                      <div>
+                        <span>2024-03-20 12:30</span>
+                        <small class="d-block text-muted">2 days ago</small>
+                      </div>
+                    </td>
+                    <td data-label="Type">
+                      <span class="badge bg-info text-white">
+                        <i class="bi bi-lightning-fill me-1"></i>Signal Malfunction
+                      </span>
+                    </td>
+                    <td data-label="Location">
+                      
+                        <i class="bi bi-geo-alt-fill text-info me-1"></i>
+                        <span>East-West Intersection</span>
+                        <button class="btn btn-sm text-primary ms-2 p-0" title="View on map">
+                          <i class="bi bi-map"></i>
+                        </button>
+                      
+                    </td>
+                    <td data-label="Severity"><span class="badge bg-info">Low</span></td>
+                    <td data-label="Status">
+                      <span class="badge bg-success">
+                        <i class="bi bi-check-circle me-1"></i>Resolved
+                      </span>
+                    </td>
+                    <td data-label="Response Time">
+                      
+                        <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                          <div class="progress-bar bg-success" role="progressbar" style="width: 100%;"></div>
+                        </div>
+                        <span>1:15</span>
+                      
+                    </td>
+                    <td data-label="Actions">
+                      <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-primary">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary">
+                          <i class="bi bi-camera-video"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"></button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-text me-2"></i>View Report</a></li>
+                          <li><a class="dropdown-item" href="#"><i class="bi bi-share me-2"></i>Share</a></li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li><a class="dropdown-item" href="#"><i class="bi bi-archive me-2"></i>Archive</a></li>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <small class="text-muted">Showing 3 of 24 incidents</small>
+              </div>
+              <nav aria-label="Incident pagination">
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                  </li>
+                  <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                  <li class="page-item"><a class="page-link" href="#">2</a></li>
+                  <li class="page-item"><a class="page-link" href="#">3</a></li>
+                  <li class="page-item">
+                    <a class="page-link" href="#">Next</a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+      <!-- Settings Section -->
+      <section id="settings" class="mb-5">
+        <div class="dashboard-card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5><i class="bi bi-gear me-2"></i>System Settings</h5>
+            <div class="btn-group btn-group-responsive" role="group">
+              <button type="button" class="btn btn-outline-primary" id="saveSettings">
+                <i class="bi bi-save me-1"></i><span class="d-none d-md-inline">Save</span><span class="d-md-none">Changes</span>
+              </button>
+              <button type="button" class="btn btn-outline-secondary" id="resetSettings">
+                <i class="bi bi-arrow-counterclockwise me-1"></i><span class="d-none d-md-inline">Reset</span>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <!-- Traffic Management Settings -->
+              <div class="col-md-6 mb-4">
+                <div class="settings-card">
+                  <h6 class="mb-3"><i class="bi bi-traffic-light me-2"></i>Traffic Management</h6>
+                  <form id="trafficSettings">
+                    <div class="mb-3">
+                      <label for="congestionThreshold" class="form-label">Congestion Threshold</label>
+                      <div class="input-group">
+                        <input type="number" class="form-control" id="congestionThreshold" value="100">
+                        <span class="input-group-text">vehicles/min</span>
+                      </div>
+                      <small class="text-muted">Alert when traffic exceeds this threshold</small>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="signalTiming" class="form-label">Signal Timing</label>
+                      <select class="form-select" id="signalTiming">
+                        <option value="dynamic">Dynamic (Auto-adjust)</option>
+                        <option value="fixed">Fixed Timing</option>
+                        <option value="peak">Peak Hours</option>
+                        <option value="offpeak">Off-Peak Hours</option>
+                      </select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="emergencyPriority" class="form-label">Emergency Vehicle Priority</label>
+                      <select class="form-select" id="emergencyPriority">
+                        <option value="high">High Priority</option>
+                        <option value="medium">Medium Priority</option>
+                        <option value="low">Low Priority</option>
+                      </select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Traffic Flow Optimization</label>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="enableOptimization" checked>
+                        <label class="form-check-label" for="enableOptimization">
+                          Enable Real-time Optimization
+                        </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enablePredictions" checked>
+                        <label class="form-check-label" for="enablePredictions">
+                          Enable Traffic Predictions
+                        </label>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Camera Settings -->
+              <div class="col-md-6 mb-4">
+                <div class="settings-card">
+                  <h6 class="mb-3"><i class="bi bi-camera-video me-2"></i>Camera Settings</h6>
+                  <form id="cameraSettings">
+                    <div class="mb-3">
+                      <label for="cameraQuality" class="form-label">Camera Quality</label>
+                      <select class="form-select" id="cameraQuality">
+                        <option value="high">High (1080p)</option>
+                        <option value="medium">Medium (720p)</option>
+                        <option value="low">Low (480p)</option>
+                      </select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="recordingDuration" class="form-label">Recording Duration</label>
+                      <select class="form-select" id="recordingDuration">
+                        <option value="24">24 Hours</option>
+                        <option value="48">48 Hours</option>
+                        <option value="72">72 Hours</option>
+                        <option value="168">7 Days</option>
+                      </select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Camera Features</label>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="enableMotion" checked>
+                        <label class="form-check-label" for="enableMotion">
+                          Motion Detection
+                        </label>
+                      </div>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="enableNight" checked>
+                        <label class="form-check-label" for="enableNight">
+                          Night Vision
+                        </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enableAutoFocus" checked>
+                        <label class="form-check-label" for="enableAutoFocus">
+                          Auto Focus
+                        </label>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-4">
+                <div class="settings-card">
+                  <h6 class="mb-3"><i class="bi bi-bell me-2"></i>Alert Settings</h6>
+                  <form id="alertSettings">
+                    <div class="mb-3">
+                      <label class="form-label">Alert Types</label>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="alertTraffic" checked>
+                        <label class="form-check-label" for="alertTraffic">
+                          Traffic Congestion
+                        </label>
+                      </div>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="alertEmergency" checked>
+                        <label class="form-check-label" for="alertEmergency">
+                          Emergency Vehicles
+                        </label>
+                      </div>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="alertWeather" checked>
+                        <label class="form-check-label" for="alertWeather">
+                          Weather Conditions
+                        </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="alertSystem" checked>
+                        <label class="form-check-label" for="alertSystem">
+                          System Status
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="alertSound" class="form-label">Alert Sound</label>
+                      <select class="form-select" id="alertSound">
+                        <option value="default">Default</option>
+                        <option value="beep">Beep</option>
+                        <option value="chime">Chime</option>
+                        <option value="none">None</option>
+                      </select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="alertVolume" class="form-label">Alert Volume</label>
+                      <input type="range" class="form-range" id="alertVolume" min="0" max="100" value="50">
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-4">
+                <div class="settings-card">
+                  <h6 class="mb-3"><i class="bi bi-display me-2"></i>System Preferences</h6>
+                  <form id="systemSettings">
+                    <div class="mb-3">
+                      <label for="theme" class="form-label">Theme</label>
+                      <select class="form-select" id="theme">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="auto">Auto (System)</option>
+                      </select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="refreshRate" class="form-label">Data Refresh Rate</label>
+                      <select class="form-select" id="refreshRate">
+                        <option value="5">5 seconds</option>
+                        <option value="10">10 seconds</option>
+                        <option value="30">30 seconds</option>
+                        <option value="60">1 minute</option>
+                      </select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Display Options</label>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="showGrid" checked>
+                        <label class="form-check-label" for="showGrid">
+                          Show Grid Lines
+                        </label>
+                      </div>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="showLabels" checked>
+                        <label class="form-check-label" for="showLabels">
+                          Show Data Labels
+                        </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="showTooltips" checked>
+                        <label class="form-check-label" for="showTooltips">
+                          Show Tooltips
+                        </label>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- <section id="reports" class="mb-5">
+        <div class="dashboard-card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5><i class="bi bi-file-earmark-text me-2"></i>Traffic Reports</h5>
+            <div class="btn-group btn-group-responsive" role="group">
+              <button type="button" class="btn btn-outline-primary" id="generateReport">
+                <i class="bi bi-lightning me-1"></i><span class="d-none d-md-inline">Generate</span>
+              </button>
+              <button type="button" class="btn btn-outline-primary" id="scheduleReport">
+                <i class="bi bi-calendar-check me-1"></i><span class="d-none d-md-inline">Schedule</span>
+              </button>
+              <div class="dropdown">
+                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="exportReportDropdown" data-bs-toggle="dropdown">
+                  <i class="bi bi-download me-1"></i><span class="d-none d-md-inline">Export</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="#" id="exportReportPDF"><i class="bi bi-file-pdf me-2"></i>PDF</a></li>
+                  <li><a class="dropdown-item" href="#" id="exportReportCSV"><i class="bi bi-file-spreadsheet me-2"></i>CSV</a></li>
+                  <li><a class="dropdown-item" href="#" id="exportReportExcel"><i class="bi bi-file-excel me-2"></i>Excel</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-center mb-4">
+              <div class="btn-group report-period-selector" role="group">
+                <button type="button" class="btn btn-outline-primary active" data-period="daily">Daily</button>
+                <button type="button" class="btn btn-outline-primary" data-period="weekly">Weekly</button>
+                <button type="button" class="btn btn-outline-primary" data-period="monthly">Monthly</button>
+                <button type="button" class="btn btn-outline-primary" id="customPeriodBtn" data-period="custom">Custom</button>
+              </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+              <div class="col-md-3">
+                <div class="stat-card">
+                  <div class="stat-title">Total Traffic Volume</div>
+                  <div class="stat-value" id="reportTotalVolume">0</div>
+                  <div class="stat-trend" id="volumeTrend">No data available</div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="stat-card">
+                  <div class="stat-title">Average Traffic Flow</div>
+                  <div class="stat-value" id="reportAvgFlow">0 vehicles/min</div>
+                  <div class="stat-trend" id="flowTrend">No data available</div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="stat-card">
+                  <div class="stat-title">Peak Traffic Hours</div>
+                  <div class="stat-value" id="reportPeakHours">-</div>
+                  <div class="stat-trend" id="peakTrend"></div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="stat-card">
+                  <div class="stat-title">Incidents Recorded</div>
+                  <div class="stat-value" id="reportIncidents">0</div>
+                  <div class="stat-trend" id="incidentTrend">No data available</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <div class="col-md-8 mb-3">
+                <div class="card">
+                  <div class="card-header">
+                    <h6 class="mb-0">Traffic Trend</h6>
+                  </div>
+                  <div class="card-body" style="height: 300px;">
+                    <canvas id="reportTrafficTrendChart" style="width: 100%; height: 100%;"></canvas>
+                </div>
+              </div>
+                  </div>
+              <div class="col-md-4 mb-3">
+                <div class="card">
+                  <div class="card-header">
+                    <h6 class="mb-0">Vehicle Distribution</h6>
+                  </div>
+                  <div class="card-body" style="height: 300px;">
+                    <canvas id="reportDistributionChart" style="width: 100%; height: 100%;"></canvas>
+                  </div>
+                </div>
+                
+                <div class="card mt-3">
+                  <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-arrow-left-right me-2"></i>Direction Distribution</h6>
+                  </div>
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>Northbound</span>
+                      <span id="reportNorthbound">45%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 10px;">
+                      <div class="progress-bar bg-primary" id="reportNorthboundBar" role="progressbar" style="width: 45%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>Southbound</span>
+                      <span id="reportSouthbound">55%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 10px;">
+                      <div class="progress-bar bg-success" id="reportSouthboundBar" role="progressbar" style="width: 55%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mt-4">
+              <div class="col-12">
+                <div class="analysis-section">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Incident Summary</h6>
+                    <button class="btn btn-sm btn-primary" id="addIncidentBtn">
+                      <i class="bi bi-plus-circle me-1"></i>Add Incident
+                    </button>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Incident Type</th>
+                          <th>Count</th>
+                          <th>Most Common Location</th>
+                          <th>Avg. Response Time</th>
+                          <th>Resolution Rate</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="incidentSummaryTable">
+                        <tr>
+                          <td><span class="badge bg-danger"><i class="bi bi-car-front-fill me-1"></i>Accidents</span></td>
+                          <td>5</td>
+                          <td>Main Intersection</td>
+                          <td>12.5 min</td>
+                          <td>
+                            <div class="progress" style="height: 6px; width: 100px;">
+                              <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="btn-group btn-group-sm">
+                              <button class="btn btn-outline-secondary edit-incident-btn" data-type="accident">
+                                <i class="bi bi-pencil"></i>
+                              </button>
+                              <button class="btn btn-outline-danger delete-incident-btn" data-type="accident">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><span class="badge bg-warning text-dark"><i class="bi bi-exclamation-diamond-fill me-1"></i>Congestion</span></td>
+                          <td>12</td>
+                          <td>Northbound Highway</td>
+                          <td>5.2 min</td>
+                          <td>
+                            <div class="progress" style="height: 6px; width: 100px;">
+                              <div class="progress-bar bg-success" role="progressbar" style="width: 85%"></div>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="btn-group btn-group-sm">
+                              <button class="btn btn-outline-secondary edit-incident-btn" data-type="congestion">
+                                <i class="bi bi-pencil"></i>
+                              </button>
+                              <button class="btn btn-outline-danger delete-incident-btn" data-type="congestion">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><span class="badge bg-info"><i class="bi bi-lightning-fill me-1"></i>Signal Malfunction</span></td>
+                          <td>3</td>
+                          <td>East-West Intersection</td>
+                          <td>8.7 min</td>
+                          <td>
+                            <div class="progress" style="height: 6px; width: 100px;">
+                              <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="btn-group btn-group-sm">
+                              <button class="btn btn-outline-secondary edit-incident-btn" data-type="signal">
+                                <i class="bi bi-pencil"></i>
+                              </button>
+                              <button class="btn btn-outline-danger delete-incident-btn" data-type="signal">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div class="mt-3">
+                    <h6>Manually Added Incidents</h6>
+                    <div class="table-responsive">
+                      <table class="table table-bordered table-hover">
+                        <thead>
+                          <tr>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Description</th>
+                            <th>Severity</th>
+                            <th>Date & Time</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody id="customIncidentsTable">
+                        </tbody>
+                      </table>
+                    </div>
+                    <div id="noCustomIncidents" class="alert alert-info" role="alert">
+                      <i class="bi bi-info-circle me-2"></i>No manual incidents added yet. Click "Add Incident" to record traffic incidents.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 text-center text-muted" id="reportStatus">
+              <small>Last report generated: Today at 08:15 AM</small>
+            </div>
+          </div>
+        </div>
+      </section> -->
+
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="customRangeModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Select Custom Time Range</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="startDate" class="form-label">Start Date & Time</label>
+              <input type="datetime-local" class="form-control" id="startDate">
+            </div>
+            <div class="mb-3">
+              <label for="endDate" class="form-label">End Date & Time</label>
+              <input type="datetime-local" class="form-control" id="endDate">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="applyCustomRange">Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="scheduleReportModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"><i class="bi bi-calendar-check me-2"></i>Schedule Report</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="reportType" class="form-label">Report Type</label>
+              <select class="form-select" id="reportType">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="reportName" class="form-label">Report Name</label>
+              <input type="text" class="form-control" id="reportName" placeholder="e.g. Monthly Traffic Analysis">
+            </div>
+            <div class="mb-3">
+              <label for="recipientEmail" class="form-label">Recipients (Email)</label>
+              <input type="email" class="form-control" id="recipientEmail" placeholder="Enter email addresses separated by comma">
+              <small class="text-muted">Multiple emails can be separated by commas</small>
+            </div>
+            <div class="mb-3">
+              <label for="scheduleFrequency" class="form-label">Frequency</label>
+              <select class="form-select" id="scheduleFrequency">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+            <div class="mb-3" id="weeklyOptions" style="display: none;">
+              <label class="form-label">Day of Week</label>
+              <select class="form-select" id="dayOfWeek">
+                <option value="1">Monday</option>
+                <option value="2">Tuesday</option>
+                <option value="3">Wednesday</option>
+                <option value="4">Thursday</option>
+                <option value="5">Friday</option>
+                <option value="6">Saturday</option>
+                <option value="0">Sunday</option>
+              </select>
+            </div>
+            <div class="mb-3" id="monthlyOptions" style="display: none;">
+              <label class="form-label">Day of Month</label>
+              <select class="form-select" id="dayOfMonth">
+                <option value="1">1st</option>
+                <option value="15">15th</option>
+                <option value="last">Last day</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="scheduleTime" class="form-label">Time</label>
+              <input type="time" class="form-control" id="scheduleTime" value="08:00">
+            </div>
+            <div class="mb-3">
+              <label for="reportFormat" class="form-label">Format</label>
+              <select class="form-select" id="reportFormat">
+                <option value="pdf">PDF</option>
+                <option value="excel">Excel</option>
+                <option value="csv">CSV</option>
+              </select>
+            </div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="includeCharts" checked>
+              <label class="form-check-label" for="includeCharts">
+                Include charts and visualization
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="saveSchedule">Schedule Report</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="compareModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Compare Traffic Patterns</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h6 class="mb-3">Current Period</h6>
+                <div id="currentChartContainer" class="chart-container" style="height: 300px; width: 100%; position: relative; visibility: visible; display: block;">
+                  <canvas id="currentPatternChart" style="display: block; visibility: visible; width: 100%; height: 100%;"></canvas>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h6 class="mb-3">Previous Period</h6>
+                <div id="previousChartContainer" class="chart-container" style="height: 300px; width: 100%; position: relative; visibility: visible; display: block;">
+                  <canvas id="previousPatternChart" style="display: block; visibility: visible; width: 100%; height: 100%;"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3">
+              <div class="alert alert-info">
+                <h6 class="mb-2">Pattern Analysis</h6>
+                <div id="patternAnalysis"></div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="debugComparisonBtn" onclick="window.debugComparisonCharts(); showToast('Comparison charts debug info logged to console', 'info');">
+              <i class="bi bi-bug me-1"></i>Debug Charts
+            </button>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="refreshComparisonBtn" onclick="window.fixComparisonCharts ? window.fixComparisonCharts() : showToast('Fix function not available', 'error');">
+              <i class="bi bi-arrow-repeat me-1"></i>Refresh Charts
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="logoutModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"><i class="bi bi-box-arrow-right me-2"></i>Confirm Logout</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to logout?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="confirmLogout">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class=" ">
+      <div class="container-fluid footer-bg">
+        <div class="container py-4">
+          <!-- Upper Footer -->
+          <div class="row g-4 border-bottom pb-4 mb-4">
+            <div class="col-lg-4 col-md-6">
+              <div class="footer-brand mb-3">
+                <i class="bi bi-traffic-light-fill fs-3 me-2 text-primary"></i>
+                <span class="fs-4 fw-bold text-white">TSCS Platform</span>
+              </div>
+              <p class="text-light opacity-75 mb-3">Your comprehensive solution for urban traffic management, focused on optimizing traffic flow and prioritizing emergency response.</p>
+              <div class="d-flex gap-2 mb-3">
+                <a href="#" class="btn btn-sm btn-outline-light rounded-circle p-2"><i class="bi bi-facebook"></i></a>
+                <a href="#" class="btn btn-sm btn-outline-light rounded-circle p-2"><i class="bi bi-twitter"></i></a>
+                <a href="#" class="btn btn-sm btn-outline-light rounded-circle p-2"><i class="bi bi-linkedin"></i></a>
+                <a href="#" class="btn btn-sm btn-outline-light rounded-circle p-2"><i class="bi bi-github"></i></a>
+              </div>
+              <!-- Export test button - hidden in production -->
+              <div class="my-2 d-none">
+                <button id="testExportPdfBtn" class="btn btn-sm btn-warning">
+                  Test PDF Export
+                </button>
+                <button id="testExportExcelBtn" class="btn btn-sm btn-info">
+                  Test Excel Export
+                </button>
+              </div>
+            </div>
+            <div class="col-lg-2 col-md-6 col-6">
+              <h5 class="text-white mb-4 footer-header">Navigation</h5>
+              <ul class="list-unstyled footer-links">
+                <li class="mb-2"><a href="/" class="footer-link"><i class="bi bi-chevron-right small me-2"></i>Home</a></li>
+                <li class="mb-2"><a href="/dashboard/" class="footer-link"><i class="bi bi-chevron-right small me-2"></i>Dashboard</a></li>
+                <li class="mb-2"><a href="/monitoring/" class="footer-link"><i class="bi bi-chevron-right small me-2"></i>Monitoring</a></li>
+                <!-- <li class="mb-2"><a href="/reports/" class="footer-link"><i class="bi bi-chevron-right small me-2"></i>Reports</a></li> -->
+                <li><a href="/settings/" class="footer-link"><i class="bi bi-chevron-right small me-2"></i>Settings</a></li>
+              </ul>
+            </div>
+            <div class="col-lg-2 col-md-6 col-6">
+              <h5 class="text-white mb-4 footer-header">Resources</h5>
+              <ul class="list-unstyled footer-links">
+                <li class="mb-2"><a href="#" class="footer-link"><i class="bi bi-chevron-right small me-2"></i>Documentation</a></li>
+                <li class="mb-2"><a href="#" class="footer-link"><i class="bi bi-chevron-right small me-2"></i>API Reference</a></li>
+                <li class="mb-2"><a href="#" class="footer-link"><i class="bi bi-chevron-right small me-2"></i>Knowledge Base</a></li>
+                <li class="mb-2"><a href="#" class="footer-link"><i class="bi bi-chevron-right small me-2"></i>Tutorials</a></li>
+                <li><a href="#" class="footer-link"><i class="bi bi-chevron-right small me-2"></i>Support</a></li>
+              </ul>
+            </div>
+            <div class="col-lg-4 col-md-6">
+              <h5 class="text-white mb-4 footer-header">Stay Updated</h5>
+              <p class="text-light opacity-75 mb-3">Subscribe to our newsletter for updates on new features and traffic management innovations.</p>
+              <div class="input-group mb-3">
+                <input type="email" class="form-control" style="width: 100% !important; flex: 1 1 100% !important;" placeholder="Your email address" aria-label="Your email address">
+                <button class="btn btn-primary mt-3" type="button">Subscribe</button>
+              </div>
+              <div class="d-flex align-items-center mt-4">
+                <i class="bi bi-headset text-primary fs-3 me-3"></i>
+                <div>
+                  <p class="text-white mb-0 fw-bold">24/7 Support Center</p>
+                  <p class="text-light opacity-75 mb-0">(555) 123-4567</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Lower Footer -->
+          <div class="row align-items-center">
+            <div class="col-md-6 mb-3 mb-md-0">
+              <div class="d-flex flex-wrap gap-3">
+                <a href="#" class="text-light opacity-75 text-decoration-none small">Privacy Policy</a>
+                <span class="text-light opacity-50">|</span>
+                <a href="#" class="text-light opacity-75 text-decoration-none small">Terms of Service</a>
+                <span class="text-light opacity-50">|</span>
+                <a href="#" class="text-light opacity-75 text-decoration-none small">Compliance</a>
+              </div>
+              <p class="text-light opacity-75 small mt-2 mb-0">&copy; 2025 Smart Traffic Management System. All rights reserved.</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+              <div class="d-flex align-items-center justify-content-md-end gap-3">
+                <div class="d-flex align-items-center">
+                  <span class="badge bg-success me-2">v2.5.0</span>
+                  <span class="text-light opacity-75 small">Stable Release</span>
+                </div>
+                <a href="#" class="btn btn-sm btn-outline-light" title="Back to top">
+                  <i class="bi bi-arrow-up"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Add Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+      <!-- Toasts will be inserted here dynamically -->
+    </div>
+    
+    <!-- Bootstrap JS Bundle with Popper is already included in the head section -->
+    <!-- No additional scripts needed here -->
+    
+    <!-- Custom JS -->
+    <script src="/static/js/dashboard.js"></script>
+    
+    <!-- Fix time range buttons -->
+    <script>
+      // Add event listeners for time range buttons
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM loaded - setting up custom buttons");
+        
+        // CUSTOM RANGE BUTTON FOR TRAFFIC FLOW
+        // ===================================
+        const customRangeBtn = document.getElementById('customRangeBtn');
+        if (customRangeBtn) {
+          console.log("Found custom range button", customRangeBtn);
+          
+          // Directly add click handler
+          customRangeBtn.onclick = function(e) {
+            e.preventDefault();
+            console.log("Custom range button clicked");
+            
+            // Find the modal element
+            const customRangeModal = document.getElementById('customRangeModal');
+            if (!customRangeModal) {
+              console.error("Custom range modal not found");
+              alert("Error: Custom range modal not found");
+                    return;
+            }
+            
+            // Set default dates (now and 2 hours ago)
+            const now = new Date();
+            const twoHoursAgo = new Date(now.getTime() - (2 * 60 * 60 * 1000));
+            
+            // Format for datetime-local input: YYYY-MM-DDThh:mm
+            const formatDate = (date) => {
+              return date.toISOString().slice(0, 16);
+            };
+            
+            // Set values if inputs exist
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            
+            if (startDateInput) startDateInput.value = formatDate(twoHoursAgo);
+            if (endDateInput) endDateInput.value = formatDate(now);
+            
+            // Show the modal
+            if (typeof bootstrap !== 'undefined') {
+              try {
+                const modal = new bootstrap.Modal(customRangeModal);
+                modal.show();
+              } catch (e) {
+                console.error("Error showing modal:", e);
+                alert("Could not show custom range modal. Please try again.");
+              }
+            } else {
+              console.error("Bootstrap not loaded properly");
+              alert("Error: Bootstrap not loaded properly");
+            }
+          };
+        } else {
+          console.error("Custom range button not found");
+        }
+        
+        // Apply custom range button handler
+        const applyCustomBtn = document.getElementById('applyCustomRange');
+        if (applyCustomBtn) {
+          console.log("Found apply custom range button");
+          
+          applyCustomBtn.onclick = function(e) {
+            e.preventDefault();
+            console.log("Apply custom range clicked");
+            
+            const startInput = document.getElementById('startDate');
+            const endInput = document.getElementById('endDate');
+            
+            if (!startInput || !endInput) {
+              console.error("Start or end date inputs not found");
+              alert("Error: Date inputs not found");
+                  return;
+            }
+            
+            const startDate = new Date(startInput.value);
+            const endDate = new Date(endInput.value);
+            
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+              console.error("Invalid date format");
+              alert("Please enter valid dates");
+                    return;
+            }
+            
+            if (endDate <= startDate) {
+              console.error("End date must be after start date");
+              alert("End date must be after start date");
+                return;
+              }
+              
+            // Calculate minutes difference
+            const diffMinutes = Math.round((endDate - startDate) / (60 * 1000));
+            console.log(`Custom range: ${diffMinutes} minutes`);
+            
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('customRangeModal'));
+            if (modal) modal.hide();
+            
+            // Update the chart
+            try {
+              if (typeof window.fetchTrafficFlowData === 'function') {
+                window.fetchTrafficFlowData(diffMinutes);
+                if (typeof showToast === 'function') {
+                  showToast(`Applied custom range of ${diffMinutes} minutes`, 'success');
+                }
+        } else {
+                console.error("Traffic data fetch function not found");
+                alert("Could not update traffic data");
+              }
+              
+              // Update button states
+              document.querySelectorAll('[data-range]').forEach(btn => {
+                btn.classList.remove('active');
+              });
+              customRangeBtn.classList.add('active');
+              
+            } catch (e) {
+              console.error("Error applying custom range:", e);
+              alert("Error applying custom range");
+            }
+          };
+        }
+        
+        // Add listeners for regular time range buttons (30min, 1hr, etc.)
+        const timeRangeButtons = document.querySelectorAll('[data-range]:not(#customRangeBtn)');
+        timeRangeButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const range = parseInt(this.getAttribute('data-range'), 10);
+            if (!isNaN(range)) {
+              console.log(`Time range button clicked: ${range} minutes`);
+              
+              // Update active state
+              document.querySelectorAll('[data-range]').forEach(btn => {
+                btn.classList.remove('active');
+              });
+              this.classList.add('active');
+              
+              // Call the time range function
+              if (typeof window.fetchTrafficFlowData === 'function') {
+                window.fetchTrafficFlowData(range);
+                showToast(`Showing traffic data for ${range} minutes`, 'info');
+            } else {
+                console.error("fetchTrafficFlowData function not found");
+                showToast("Error: Could not update time range", "error");
+              }
+            }
+          });
+        });
+        
+        // CUSTOM PERIOD BUTTON FOR REPORTS
+        // ===============================
+        const customPeriodBtn = document.getElementById('customPeriodBtn');
+        if (customPeriodBtn) {
+          console.log("Found custom period button for reports");
+          
+          customPeriodBtn.onclick = function(e) {
+            e.preventDefault();
+            console.log("Custom period button clicked");
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.report-period-selector button').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            
+            // Add active class to this button
+            this.classList.add('active');
+            
+            // Find the modal element
+            const customReportPeriodModal = document.getElementById('customReportPeriodModal');
+            if (!customReportPeriodModal) {
+              console.error("Custom report period modal not found");
+              showToast("Error: Custom report period modal not found", "error");
+              return;
+            }
+            
+            // Set default dates (today and one month ago)
+            const today = new Date();
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+            
+            // Format date for date input: YYYY-MM-DD
+            const formatDate = (date) => {
+              return date.toISOString().split('T')[0];
+            };
+            
+            // Set values if inputs exist
+            const startDateInput = document.getElementById('reportStartDate');
+            const endDateInput = document.getElementById('reportEndDate');
+            
+            if (startDateInput) startDateInput.value = formatDate(oneMonthAgo);
+            if (endDateInput) endDateInput.value = formatDate(today);
+            
+            // Show the modal
+            if (typeof bootstrap !== 'undefined') {
+              try {
+                const modal = new bootstrap.Modal(customReportPeriodModal);
+                modal.show();
+              } catch (e) {
+                console.error("Error showing report period modal:", e);
+                showToast("Could not show custom report period modal. Please try again.", "error");
+              }
+            } else {
+              console.error("Bootstrap not loaded properly");
+              showToast("Error: Bootstrap not loaded properly", "error");
+            }
+          };
+        } else {
+          console.error("Custom period button for reports not found");
+        }
+        
+        // Apply custom report period button handler
+        const applyReportPeriodBtn = document.getElementById('applyReportPeriod');
+        if (applyReportPeriodBtn) {
+          console.log("Found apply report period button");
+          
+          applyReportPeriodBtn.onclick = function(e) {
+            e.preventDefault();
+            console.log("Apply report period clicked");
+            
+            const startInput = document.getElementById('reportStartDate');
+            const endInput = document.getElementById('reportEndDate');
+            
+            if (!startInput || !endInput) {
+              console.error("Report date inputs not found");
+              showToast("Error: Date inputs not found", "error");
+              return;
+            }
+            
+            const startDate = new Date(startInput.value);
+            const endDate = new Date(endInput.value);
+            
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+              console.error("Invalid date format");
+              showToast("Please enter valid dates", "warning");
+              return;
+            }
+            
+            if (endDate <= startDate) {
+              console.error("End date must be after start date");
+              showToast("End date must be after start date", "warning");
+              return;
+            }
+            
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('customReportPeriodModal'));
+            if (modal) modal.hide();
+            
+            // Update the report data
+            try {
+              if (typeof window.updateReportData === 'function') {
+                // Pass start and end dates to the function
+                window.updateReportData('custom', {
+                  startDate: startDate,
+                  endDate: endDate
+                });
+                showToast(`Applied custom report period from ${startInput.value} to ${endInput.value}`, 'success');
+              } else {
+                console.error("Report data update function not found");
+                showToast("Could not update report data", "error");
+              }
+              
+              // Update button states - already handled in onclick
+              
+            } catch (e) {
+              console.error("Error applying custom report period:", e);
+              showToast("Error applying custom report period", "error");
+            }
+          };
+        }
+        
+        // Add listeners for regular report period buttons (daily, weekly, monthly)
+        const reportPeriodButtons = document.querySelectorAll('.report-period-selector button:not(#customPeriodBtn)');
+        reportPeriodButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const period = this.getAttribute('data-period');
+            console.log('period',period)
+            if (period) {
+              console.log(`Report period button clicked: ${period}`);
+              
+              // Update active state
+              document.querySelectorAll('.report-period-selector button').forEach(btn => {
+                btn.classList.remove('active');
+              });
+              this.classList.add('active');
+              
+              // Call the report update function
+              console.log('updateReportData',period)
+              if (typeof window.updateReportData === 'function') {
+                window.updateReportData(period);
+                showToast(`Showing ${period} report data`, 'info');
+              } else {
+                console.error("updateReportData function not found");
+                showToast("Error: Could not update report period", "error");
+              }
+            }
+          });
+        });
+        
+       
+      });
+    </script>
+
+    <!-- Incident Management Modal -->
+    <div class="modal fade" id="incidentModal" tabindex="-1" aria-labelledby="incidentModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="incidentModalLabel">Add New Incident</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="incidentForm">
+              <input type="hidden" id="incidentId" value="">
+              <div class="mb-3">
+                <label for="incidentType" class="form-label">Incident Type</label>
+                <select class="form-select" id="incidentType" required>
+                  <option value="" selected disabled>Select incident type</option>
+                  <option value="Accident">Accident</option>
+                  <option value="Congestion">Traffic Congestion</option>
+                  <option value="Signal">Signal Malfunction</option>
+                  <option value="Construction">Road Construction</option>
+                  <option value="Weather">Weather-related</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="incidentLocation" class="form-label">Location</label>
+                <input type="text" class="form-control" id="incidentLocation" required placeholder="e.g. Main St & 1st Ave">
+              </div>
+              <div class="mb-3">
+                <label for="incidentDescription" class="form-label">Description</label>
+                <textarea class="form-control" id="incidentDescription" rows="3" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="incidentSeverity" class="form-label">Severity</label>
+                <select class="form-select" id="incidentSeverity" required>
+                  <option value="Low">Low</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="High">High</option>
+                  <option value="Critical">Critical</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="incidentDateTime" class="form-label">Date & Time</label>
+                <input type="datetime-local" class="form-control" id="incidentDateTime" required>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="saveIncidentBtn">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirm Delete</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to delete this incident?
+            <input type="hidden" id="deleteIncidentId">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Report Period Modal -->
+    <div class="modal fade" id="customReportPeriodModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"><i class="bi bi-calendar3 me-2"></i>Select Custom Report Period</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="reportStartDate" class="form-label">Start Date</label>
+              <input type="date" class="form-control" id="reportStartDate">
+            </div>
+            <div class="mb-3">
+              <label for="reportEndDate" class="form-label">End Date</label>
+              <input type="date" class="form-control" id="reportEndDate">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="applyReportPeriod">Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard View Modal -->
+    <div class="modal fade" id="dashboardViewModal" tabindex="-1">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title"><i class="bi bi-speedometer2 me-2"></i>Traffic Dashboard Overview</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Dashboard Summary Section -->
+            <div class="row mb-4">
+              <div class="col-md-12">
+                <div class="alert alert-info d-flex align-items-center" role="alert">
+                  <i class="bi bi-info-circle-fill me-2 fs-4"></i>
+                  <div>
+                    Real-time traffic dashboard showing current conditions across all monitored intersections.
+                    <span class="ms-2 badge bg-success">Live Data</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Key Metrics Cards -->
+            <div class="row g-3 mb-4">
+              <div class="col-md-3">
+                <div class="card border-0 bg-light h-100">
+                  <div class="card-body text-center">
+                    <div class="display-5 mb-3 text-primary">
+                      <i class="bi bi-car-front"></i>
+                    </div>
+                    <h5 class="card-title">Total Traffic</h5>
+                    <h2 id="dashboardTotalTraffic" class="mb-0">28,452</h2>
+                    <p class="text-muted small">vehicles today</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card border-0 bg-light h-100">
+                  <div class="card-body text-center">
+                    <div class="display-5 mb-3 text-success">
+                      <i class="bi bi-activity"></i>
+                    </div>
+                    <h5 class="card-title">Current Flow</h5>
+                    <h2 id="dashboardCurrentFlow" class="mb-0">47</h2>
+                    <p class="text-muted small">vehicles/minute</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card border-0 bg-light h-100">
+                  <div class="card-body text-center">
+                    <div class="display-5 mb-3 text-warning">
+                      <i class="bi bi-clock"></i>
+                    </div>
+                    <h5 class="card-title">Peak Time</h5>
+                    <h2 id="dashboardPeakTime" class="mb-0">17:00</h2>
+                    <p class="text-muted small">avg wait: 3.5 min</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card border-0 bg-light h-100">
+                  <div class="card-body text-center">
+                    <div class="display-5 mb-3 text-danger">
+                      <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <h5 class="card-title">Incidents</h5>
+                    <h2 id="dashboardIncidents" class="mb-0">5</h2>
+                    <p class="text-muted small">3 active, 2 resolved</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Real-time Flow Chart -->
+            <div class="row mb-4">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Real-time Traffic Flow</h5>
+                    <div class="btn-group btn-group-sm">
+                      <button type="button" class="btn btn-outline-secondary" id="dashboardHourlyBtn">Hourly</button>
+                      <button type="button" class="btn btn-outline-secondary active" id="dashboardLiveBtn">Live</button>
+                      <button type="button" class="btn btn-outline-secondary" id="dashboardDailyBtn">Daily</button>
+                    </div>
+                  </div>
+                  <div class="card-body" style="height: 300px;">
+                    <canvas id="dashboardFlowChart" style="width: 100%; height: 100%;"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Location Status & Map Row -->
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <h5 class="mb-0">Intersection Status</h5>
+                  </div>
+                  <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                      <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                          <span>Main Intersection</span>
+                        </div>
+                        <div>
+                          <span class="badge bg-success me-2">Operational</span>
+                          <span class="badge bg-secondary">34 veh/min</span>
+                        </div>
+                      </div>
+                      <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                          <span>North Highway Entry</span>
+                        </div>
+                        <div>
+                          <span class="badge bg-warning text-dark me-2">Moderate Flow</span>
+                          <span class="badge bg-secondary">28 veh/min</span>
+                        </div>
+                      </div>
+                      <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                          <span>East-West Junction</span>
+                        </div>
+                        <div>
+                          <span class="badge bg-danger me-2">High Congestion</span>
+                          <span class="badge bg-secondary">52 veh/min</span>
+                        </div>
+                      </div>
+                      <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                          <span>South Commercial Area</span>
+                        </div>
+                        <div>
+                          <span class="badge bg-success me-2">Operational</span>
+                          <span class="badge bg-secondary">22 veh/min</span>
+                        </div>
+                      </div>
+                      <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                          <span>Downtown Center</span>
+                        </div>
+                        <div>
+                          <span class="badge bg-info me-2">Construction</span>
+                          <span class="badge bg-secondary">15 veh/min</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <h5 class="mb-0">Traffic Map</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="dashboard-map-container" style="height: 205px; background-color: #eee; position: relative;">
+                      <!-- Simulated map with traffic indicators -->
+                      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #eaeaea;">
+                        <!-- Horizontal road -->
+                        <div style="position: absolute; top: 45%; left: 0; height: 10%; width: 100%; background-color: #ddd;"></div>
+                        <!-- Vertical road -->
+                        <div style="position: absolute; top: 0; left: 45%; width: 10%; height: 100%; background-color: #ddd;"></div>
+                        
+                        <!-- Traffic points -->
+                        <div style="position: absolute; top: 45%; left: 45%; width: 10%; height: 10%; background-color: rgba(255,0,0,0.5); border-radius: 50%;" title="Heavy Traffic"></div>
+                        <div style="position: absolute; top: 20%; left: 45%; width: 10%; height: 10%; background-color: rgba(255,255,0,0.5); border-radius: 50%;" title="Moderate Traffic"></div>
+                        <div style="position: absolute; top: 45%; left: 70%; width: 10%; height: 10%; background-color: rgba(0,255,0,0.5); border-radius: 50%;" title="Light Traffic"></div>
+                        <div style="position: absolute; top: 70%; left: 45%; width: 10%; height: 10%; background-color: rgba(0,0,255,0.5); border-radius: 50%;" title="Construction Zone"></div>
+                      </div>
+                      <div class="position-absolute bottom-0 end-0 m-2">
+                        <span class="badge bg-danger me-1">Heavy</span>
+                        <span class="badge bg-warning text-dark me-1">Moderate</span>
+                        <span class="badge bg-success me-1">Light</span>
+                        <span class="badge bg-info">Construction</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Active Incidents -->
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Active Incidents</h5>
+                    <button class="btn btn-sm btn-outline-primary">View All</button>
+                  </div>
+                  <div class="card-body p-0">
+                    <div class="table-responsive">
+                      <table class="table table-hover mb-0">
+                        <thead>
+                          <tr>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                            <th>Impact</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><span class="badge bg-danger">Accident</span></td>
+                            <td>Main Intersection</td>
+                            <td><span class="badge bg-warning text-dark">In Progress</span></td>
+                            <td>Started 8 min ago</td>
+                            <td><span class="badge bg-danger">High</span></td>
+                            <td>
+                              <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary"><i class="bi bi-eye"></i></button>
+                                <button class="btn btn-outline-primary"><i class="bi bi-camera-video"></i></button>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td><span class="badge bg-warning text-dark">Congestion</span></td>
+                            <td>East-West Junction</td>
+                            <td><span class="badge bg-danger">Critical</span></td>
+                            <td>Started 23 min ago</td>
+                            <td><span class="badge bg-warning text-dark">Medium</span></td>
+                            <td>
+                              <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary"><i class="bi bi-eye"></i></button>
+                                <button class="btn btn-outline-primary"><i class="bi bi-camera-video"></i></button>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td><span class="badge bg-info">Construction</span></td>
+                            <td>Downtown Center</td>
+                            <td><span class="badge bg-success">Scheduled</span></td>
+                            <td>Started 2 hrs ago</td>
+                            <td><span class="badge bg-info">Low</span></td>
+                            <td>
+                              <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary"><i class="bi bi-eye"></i></button>
+                                <button class="btn btn-outline-primary"><i class="bi bi-camera-video"></i></button>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <span class="me-auto small text-muted">Last updated: <span id="dashboardUpdateTime">Just now</span></span>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="refreshDashboardBtn">
+              <i class="bi bi-arrow-repeat me-1"></i>Refresh Data
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Direct Fix for Dropdowns -->
+    <script>
+      // Direct fix to ensure dropdowns work
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log("[DirectFix] Applying immediate dropdown fixes");
+        
+        // Define specific problematic dropdowns to target directly
+        const specificDropdowns = [
+          { id: 'exportIncidents', menuSelector: '.dropdown-menu[aria-labelledby="exportIncidents"]' },
+          { id: 'exportDropdown', menuSelector: '.dropdown-menu[aria-labelledby="exportDropdown"]' },
+          { id: 'exportReportDropdown', menuSelector: '.dropdown-menu[aria-labelledby="exportReportDropdown"]' }, 
+          { id: 'userDropdown', menuSelector: '.dropdown-menu[aria-labelledby="userDropdown"]' }
+        ];
+        
+        // Add direct handlers for specific dropdowns
+        specificDropdowns.forEach(item => {
+          const toggle = document.getElementById(item.id);
+          const menu = document.querySelector(item.menuSelector);
+          
+          if (toggle && menu) {
+            console.log(`[DirectFix] Setting up specific dropdown: ${item.id}`);
+            
+            // Force correct styling
+            menu.style.setProperty('overflow', 'visible', 'important');
+            menu.style.setProperty('max-height', 'none', 'important');
+            menu.style.setProperty('height', 'auto', 'important');
+            menu.style.setProperty('position', 'absolute', 'important');
+            menu.style.setProperty('z-index', '9999', 'important');
+            
+            // Override click behavior
+            toggle.addEventListener('click', function(e) {
+              console.log(`[DirectFix] ${item.id} clicked`);
+              e.preventDefault();
+              e.stopPropagation();
+              
+              // Toggle visibility
+              const isVisible = menu.classList.contains('show');
+              
+              // Close all other dropdowns first
+              document.querySelectorAll('.dropdown-menu.show').forEach(otherMenu => {
+                if (otherMenu !== menu) {
+                  otherMenu.classList.remove('show');
+                  otherMenu.style.display = 'none';
+                }
+              });
+              
+              // Toggle this dropdown
+              if (isVisible) {
+                menu.classList.remove('show');
+                menu.style.display = 'none';
+              } else {
+                menu.classList.add('show');
+                menu.style.display = 'block';
+                
+                // Position dropdown properly
+                const rect = toggle.getBoundingClientRect();
+                menu.style.top = rect.bottom + 'px';
+                
+                if (item.id === 'userDropdown' || menu.classList.contains('dropdown-menu-end')) {
+                  // Right-aligned menu (typically user dropdown)
+                  menu.style.right = (window.innerWidth - rect.right) + 'px';
+                  menu.style.left = 'auto';
+                } else {
+                  // Left-aligned menu
+                  menu.style.left = rect.left + 'px';
+                  menu.style.right = 'auto';
+                }
+              }
+            });
+          }
+        });
+        
+        // Force all other dropdown toggles if specific handling didn't catch them
+        document.querySelectorAll('.dropdown-toggle').forEach(function(toggleBtn) {
+          // Skip if already handled specifically
+          if (specificDropdowns.some(item => item.id === toggleBtn.id)) {
+            return;
+          }
+          
+          // Find dropdown menu
+          const menu = toggleBtn.nextElementSibling;
+          if (!menu || !menu.classList.contains('dropdown-menu')) {
+            return;
+          }
+          
+          // Fix dropdown menu styles
+          menu.style.setProperty('overflow', 'visible', 'important');
+          menu.style.setProperty('max-height', 'none', 'important');
+          menu.style.setProperty('height', 'auto', 'important');
+          
+          toggleBtn.addEventListener('click', function(e) {
+            console.log('[DirectFix] Generic dropdown clicked:', toggleBtn.id || 'unnamed');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const isOpen = menu.classList.contains('show');
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.dropdown-menu.show').forEach(function(openMenu) {
+              if (openMenu !== menu) {
+                openMenu.classList.remove('show');
+                openMenu.style.display = 'none';
+              }
+            });
+            
+            // Toggle this one
+            if (isOpen) {
+              menu.classList.remove('show');
+              menu.style.display = 'none';
+            } else {
+              menu.classList.add('show');
+              menu.style.display = 'block';
+              
+              // Position it correctly
+              const rect = this.getBoundingClientRect();
+              menu.style.position = 'absolute';
+              menu.style.top = rect.bottom + 'px';
+              
+              if (menu.classList.contains('dropdown-menu-end')) {
+                menu.style.right = (window.innerWidth - rect.right) + 'px';
+                menu.style.left = 'auto';
+              } else {
+                menu.style.left = rect.left + 'px';
+                menu.style.right = 'auto';
+              }
+            }
+          });
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!e.target.closest('.dropdown')) {
+            document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
+              menu.classList.remove('show');
+              menu.style.display = 'none';
+            });
+          }
+        });
+        
+        // Fix any scrollbar issues immediately and on resize
+        function fixScrollbars() {
+          const elements = [
+            document.querySelector('.navbar'),
+            document.querySelector('.navbar .container-fluid'),
+            document.querySelector('.navbar-collapse'),
+            ...document.querySelectorAll('.dropdown-menu')
+          ].filter(el => el);
+          
+          elements.forEach(el => {
+            el.style.setProperty('overflow', 'visible', 'important');
+            el.style.setProperty('overflow-x', 'visible', 'important');
+            el.style.setProperty('overflow-y', 'visible', 'important');
+            el.style.setProperty('max-height', 'none', 'important');
+          });
+        }
+        
+        // Run fixes when the page loads and periodically after
+        fixScrollbars();
+        window.addEventListener('resize', fixScrollbars);
+        
+        // Set interval to ensure fixes are applied
+        let fixCount = 0;
+        const fixInterval = setInterval(() => {
+          fixScrollbars();
+          if (++fixCount > 5) clearInterval(fixInterval);
+        }, 500);
+      });
+    </script>
+    
+    <!-- Critical Fix Script - Runs directly -->
+    <script>
+      // Execute immediately without waiting for DOMContentLoaded
+      (function() {
+        console.log('[CriticalFix] Executing immediate dropdown fix');
+        
+        // Initial fixes that require immediate attention
+        function initialFix() {
+          // Fix export button
+          const exportBtn = document.getElementById('exportIncidents');
+          if (exportBtn) {
+            exportBtn.onclick = function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              
+              // Find the menu
+              const menu = document.querySelector('.dropdown-menu[aria-labelledby="exportIncidents"]');
+              if (!menu) return;
+              
+              // Toggle the menu
+              const isVisible = menu.classList.contains('show');
+              if (isVisible) {
+                menu.classList.remove('show');
+                menu.style.display = 'none';
+              } else {
+                // Close all other menus
+                document.querySelectorAll('.dropdown-menu.show').forEach(function(openMenu) {
+                  openMenu.classList.remove('show');
+                  openMenu.style.display = 'none';
+                });
+                
+                // Show this menu
+                menu.classList.add('show');
+                menu.style.display = 'block';
+                
+                // Style and position the menu
+                menu.style.overflow = 'visible';
+                menu.style.maxHeight = 'none';
+                menu.style.height = 'auto';
+                menu.style.position = 'absolute';
+                menu.style.zIndex = '9999';
+                
+                // Position it based on the button
+                const rect = exportBtn.getBoundingClientRect();
+                menu.style.top = rect.bottom + 'px';
+                
+                if (menu.classList.contains('dropdown-menu-end')) {
+                  menu.style.right = (window.innerWidth - rect.right) + 'px';
+                  menu.style.left = 'auto';
+                } else {
+                  menu.style.left = rect.left + 'px';
+                  menu.style.right = 'auto';
+                }
+              }
+            };
+          }
+          
+          // Apply similar fix to other important dropdowns
+          ['userDropdown', 'exportDropdown', 'exportReportDropdown'].forEach(function(id) {
+            const btn = document.getElementById(id);
+            if (btn) {
+              btn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const menuSelector = '.dropdown-menu[aria-labelledby="' + id + '"]';
+                const menu = document.querySelector(menuSelector);
+                if (!menu) return;
+                
+                // Toggle visibility
+                const isVisible = menu.classList.contains('show');
+                if (isVisible) {
+                  menu.classList.remove('show');
+                  menu.style.display = 'none';
+                } else {
+                  // Close all other menus
+                  document.querySelectorAll('.dropdown-menu.show').forEach(function(openMenu) {
+                    openMenu.classList.remove('show');
+                    openMenu.style.display = 'none';
+                  });
+                  
+                  // Show this menu
+                  menu.classList.add('show');
+                  menu.style.display = 'block';
+                  
+                  // Style and position
+                  menu.style.overflow = 'visible';
+                  menu.style.maxHeight = 'none';
+                  menu.style.height = 'auto';
+                  menu.style.zIndex = '9999';
+                  menu.style.position = 'absolute';
+                  
+                  // Position the menu based on the button
+                  const rect = btn.getBoundingClientRect();
+                  menu.style.top = rect.bottom + 'px';
+                  
+                  if (id === 'userDropdown' || menu.classList.contains('dropdown-menu-end')) {
+                    // Right aligned dropdowns
+                    menu.style.right = (window.innerWidth - rect.right) + 'px';
+                    menu.style.left = 'auto';
+                  } else {
+                    // Left aligned dropdowns
+                    menu.style.left = rect.left + 'px';
+                    menu.style.right = 'auto';
+                  }
+                }
+              };
+            }
+          });
+          
+          // Global click handler to close dropdowns
+          document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown')) {
+              document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
+                menu.classList.remove('show');
+                menu.style.display = 'none';
+              });
+            }
+          });
+        }
+        
+        // Run now if possible, otherwise after a very short delay
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          initialFix();
+        } else {
+          // Run as soon as we can
+          setTimeout(initialFix, 10);
+        }
+      })();
+    </script>
+
+    <!-- Critical Fix Script - Runs directly -->
+    <script>
+      // Wait for DOM content loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('[Final Fix] Applying final dropdown cleanup');
+        
+        // Give Bootstrap time to initialize
+        setTimeout(() => {
+          // Get all dropdown toggles
+          const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+          
+          // Ensure every toggle has the correct attributes 
+          dropdownToggles.forEach(toggle => {
+            // Make sure it has proper attributes
+            if (!toggle.hasAttribute('data-bs-toggle')) {
+              toggle.setAttribute('data-bs-toggle', 'dropdown');
+            }
+            
+            // Force BS to reinitialize this dropdown
+            if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+              new bootstrap.Dropdown(toggle);
+            }
+            
+            console.log(`[Final Fix] Initialized dropdown: ${toggle.id || 'unnamed'}`);
+          });
+          
+          // Fix any scroll issues
+          const elements = document.querySelectorAll('.navbar, .navbar-collapse, .dropdown, .dropdown-menu');
+          elements.forEach(el => {
+            if (el) {
+              el.style.overflow = 'visible';
+              if (el.classList.contains('dropdown-menu')) {
+                // Fix dropdown menu positioning
+                el.style.position = 'absolute';
+                el.style.zIndex = '1000';
+              }
+            }
+          });
+        }, 500);
+      });
+    </script>
+  </body>
+</html>
