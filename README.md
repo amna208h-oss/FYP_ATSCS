@@ -1,2 +1,2 @@
-# AI-Based-Traffic-Signal-Control-System
+# FYP_ATSCS
 Final Year Project
