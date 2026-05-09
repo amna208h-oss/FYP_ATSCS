@@ -77,21 +77,33 @@ def RegisterView(request):
     return render(request, 'register.html')
 
 def LoginView(request):
-    if request.method == "POST":
-         username = request.POST.get("username")
-         password = request.POST.get("password")
+    if request.method == 'POST':
+        username_or_email = request.POST.get('username')  # field name 'username' hai HTML mein
+        password = request.POST.get('password')
 
-         user = authenticate(request, username=username,password=password)
-         if user is not None:
-              login(request,user)
-              return redirect('home')
-         else:
-              messages.error(request,"Invalid login credentials")
-              return redirect('login')
+        # Email or username?
+        if '@' in username_or_email:
+            try:
+                user_obj = User.objects.get(email=username_or_email)
+                username = user_obj.username
+            except User.DoesNotExist:
+                messages.error(request, 'Invalid login credentials')
+                return render(request, 'login.html')
+        else:
+            username = username_or_email
 
-    
-    
-    
+        # Authenticate
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            messages.error(request, 'Invalid login credentials')
+
+
+
+
     return render(request, 'login.html')
 
 def LogoutView(request):
