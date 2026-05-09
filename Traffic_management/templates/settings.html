@@ -11,12 +11,15 @@
     <link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
 <body>
+
+    <!-- ── Navbar ─────────────────────────────────────────────────────── -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="{% url 'home' %}">
                 <i class="bi bi-traffic-light me-2"></i>TSCS Dashboard
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -30,16 +33,21 @@
         </div>
     </nav>
 
+    <!-- ── Main Content ───────────────────────────────────────────────── -->
     <div class="main-container">
         <section class="mb-5">
             <div class="dashboard-card">
+
+                <!-- Card Header with Save / Reset buttons -->
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bi bi-gear me-2"></i>System Settings</h5>
                     <div class="btn-group">
-                        <button class="btn btn-outline-primary btn-sm" id="saveSettings">
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="saveSettings"
+                                aria-label="Save settings">
                             <i class="bi bi-save me-1"></i>Save
                         </button>
-                        <button class="btn btn-outline-secondary btn-sm" id="resetSettings">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="resetSettings"
+                                aria-label="Reset settings">
                             <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
                         </button>
                     </div>
@@ -47,113 +55,152 @@
 
                 <div class="card-body">
                     <div class="row g-4">
+
+                        <!-- ── 1. Traffic Management ───────────────────────────────── -->
                         <div class="col-lg-6">
-                            <div class="settings-card">
-                                <h6><i class="bi bi-traffic-light me-2"></i>Traffic Management</h6>
-                                <div class="mb-3">
-                                    <label class="form-label">Congestion Threshold</label>
-                                    <input type="range" class="form-range" min="50" max="200" value="100">
+                            <form id="trafficSettings" aria-label="Traffic Management Settings">
+                                <div class="settings-card">
+                                    <h6><i class="bi bi-traffic-light me-2"></i>Traffic Management</h6>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="congestionThreshold">Congestion Threshold</label>
+                                        <input type="range" class="form-range"
+                                               id="congestionThreshold"
+                                               name="congestionThreshold"
+                                               min="50" max="200" value="100">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="signalTimingMode">Signal Timing Mode</label>
+                                        <select class="form-select" id="signalTimingMode" name="signalTimingMode">
+                                            <option value="Dynamic">Dynamic</option>
+                                            <option value="Fixed">Fixed</option>
+                                            <option value="Peak Hours">Peak Hours</option>
+                                            <option value="Off-Peak">Off-Peak</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox"
+                                               id="enableOptimization" name="enableOptimization" checked>
+                                        <label class="form-check-label" for="enableOptimization">
+                                            Enable Real-time Optimization
+                                        </label>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Signal Timing Mode</label>
-                                    <select class="form-select">
-                                        <option>Dynamic</option>
-                                        <option>Fixed</option>
-                                        <option>Peak Hours</option>
-                                        <option>Off-Peak</option>
-                                    </select>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="enableOptimization" checked>
-                                    <label class="form-check-label" for="enableOptimization">Enable Real-time Optimization</label>
-                                </div>
-                            </div>
+                            </form>
                         </div>
 
+                        <!-- ── 2. Camera Settings ──────────────────────────────────── -->
                         <div class="col-lg-6">
-                            <div class="settings-card">
-                                <h6><i class="bi bi-camera-video me-2"></i>Camera Settings</h6>
-                                <div class="mb-3">
-                                    <label class="form-label">Camera Quality</label>
-                                    <select class="form-select">
-                                        <option>High (1080p)</option>
-                                        <option>Medium (720p)</option>
-                                        <option>Low (480p)</option>
-                                    </select>
+                            <form id="cameraSettings" aria-label="Camera Settings">
+                                <div class="settings-card">
+                                    <h6><i class="bi bi-camera-video me-2"></i>Camera Settings</h6>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="cameraQuality">Camera Quality</label>
+                                        <select class="form-select" id="cameraQuality" name="cameraQuality">
+                                            <option value="High (1080p)">High (1080p)</option>
+                                            <option value="Medium (720p)">Medium (720p)</option>
+                                            <option value="Low (480p)">Low (480p)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="recordingDuration">Recording Duration</label>
+                                        <select class="form-select" id="recordingDuration" name="recordingDuration">
+                                            <option value="24 Hours">24 Hours</option>
+                                            <option value="48 Hours">48 Hours</option>
+                                            <option value="7 Days">7 Days</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox"
+                                               id="enableMotion" name="motionDetection" checked>
+                                        <label class="form-check-label" for="enableMotion">Motion Detection</label>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               id="enableNight" name="nightVision" checked>
+                                        <label class="form-check-label" for="enableNight">Night Vision</label>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Recording Duration</label>
-                                    <select class="form-select">
-                                        <option>24 Hours</option>
-                                        <option>48 Hours</option>
-                                        <option>7 Days</option>
-                                    </select>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="enableMotion" checked>
-                                    <label class="form-check-label" for="enableMotion">Motion Detection</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="enableNight" checked>
-                                    <label class="form-check-label" for="enableNight">Night Vision</label>
-                                </div>
-                            </div>
+                            </form>
                         </div>
 
+                        <!-- ── 3. Alert Settings ───────────────────────────────────── -->
                         <div class="col-lg-6">
-                            <div class="settings-card">
-                                <h6><i class="bi bi-bell me-2"></i>Alert Settings</h6>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="alertTraffic" checked>
-                                    <label class="form-check-label" for="alertTraffic">Traffic Congestion</label>
+                            <form id="alertSettings" aria-label="Alert Settings">
+                                <div class="settings-card">
+                                    <h6><i class="bi bi-bell me-2"></i>Alert Settings</h6>
+
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox"
+                                               id="alertTraffic" name="alertTraffic" checked>
+                                        <label class="form-check-label" for="alertTraffic">Traffic Congestion</label>
+                                    </div>
+
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox"
+                                               id="alertEmergency" name="alertEmergency" checked>
+                                        <label class="form-check-label" for="alertEmergency">Emergency Vehicles</label>
+                                    </div>
+
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox"
+                                               id="alertWeather" name="alertWeather" checked>
+                                        <label class="form-check-label" for="alertWeather">Weather Conditions</label>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="alertSound">Alert Sound</label>
+                                        <select class="form-select" id="alertSound" name="alertSound">
+                                            <option value="Default">Default</option>
+                                            <option value="Beep">Beep</option>
+                                            <option value="Chime">Chime</option>
+                                            <option value="None">None</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="alertEmergency" checked>
-                                    <label class="form-check-label" for="alertEmergency">Emergency Vehicles</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="alertWeather" checked>
-                                    <label class="form-check-label" for="alertWeather">Weather Conditions</label>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Alert Sound</label>
-                                    <select class="form-select">
-                                        <option>Default</option>
-                                        <option>Beep</option>
-                                        <option>Chime</option>
-                                        <option>None</option>
-                                    </select>
-                                </div>
-                            </div>
+                            </form>
                         </div>
 
+                        <!-- ── 4. System Preferences ──────────────────────────────── -->
                         <div class="col-lg-6">
-                            <div class="settings-card">
-                                <h6><i class="bi bi-display me-2"></i>System Preferences</h6>
-                                <div class="mb-3">
-                                    <label class="form-label">Theme</label>
-                                    <select class="form-select">
-                                        <option>Light</option>
-                                        <option>Dark</option>
-                                        <option>Auto</option>
-                                    </select>
+                            <form id="systemSettings" aria-label="System Preferences">
+                                <div class="settings-card">
+                                    <h6><i class="bi bi-display me-2"></i>System Preferences</h6>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="theme">Theme</label>
+                                        <select class="form-select" id="theme" name="theme">
+                                            <option value="light">Light</option>
+                                            <option value="dark">Dark</option>
+                                            <option value="auto">Auto</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="refreshRate">Refresh Rate</label>
+                                        <!-- values are plain numbers so parseInt() works in JS -->
+                                        <select class="form-select" id="refreshRate" name="refreshRate">
+                                            <option value="5">5 seconds</option>
+                                            <option value="10">10 seconds</option>
+                                            <option value="30">30 seconds</option>
+                                            <option value="60">1 minute</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Refresh Rate</label>
-                                    <select class="form-select">
-                                        <option>5 seconds</option>
-                                        <option>10 seconds</option>
-                                        <option>30 seconds</option>
-                                        <option>1 minute</option>
-                                    </select>
-                                </div>
-                            </div>
+                            </form>
                         </div>
-                    </div>
-                </div>
-            </div>
+
+                    </div><!-- /row -->
+                </div><!-- /card-body -->
+            </div><!-- /dashboard-card -->
         </section>
-    </div>
+    </div><!-- /main-container -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'js/settings-handler.js' %}"></script>

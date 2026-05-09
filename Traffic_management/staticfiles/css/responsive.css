@@ -1,0 +1,885 @@
+/**
+ * Smart Traffic Management System
+ * Responsive CSS Styles
+ */
+
+/* Fix horizontal scrolling on all containers */
+.container, 
+.container-fluid {
+  overflow-x: hidden;
+}
+
+/* Responsive charts */
+.chart-wrapper canvas,
+.chart-container canvas {
+  max-width: 100%;
+  height: auto !important;
+}
+
+/* Navigation responsive fixes */
+@media (max-width: 991.98px) {
+  .navbar {
+    padding: 0.75rem 1rem;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .navbar .container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  /* Match navbar width with main-container */
+  .navbar, .main-container {
+    box-sizing: border-box;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .navbar .navbar-toggler {
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    border: none;
+    position: relative;
+    width: 40px;
+    height: 40px;
+  }
+  
+  /* Custom hamburger icon */
+  .navbar .navbar-toggler .toggler-icon {
+    display: block;
+    position: absolute;
+    height: 2px;
+    width: 24px;
+    background: #fff;
+    border-radius: 1px;
+    opacity: 1;
+    left: 8px;
+    transform: rotate(0deg);
+    transition: .25s ease-in-out;
+  }
+
+  .navbar .navbar-toggler .toggler-icon:nth-child(1) {
+    top: 12px;
+  }
+
+  .navbar .navbar-toggler .toggler-icon:nth-child(2),
+  .navbar .navbar-toggler .toggler-icon:nth-child(3) {
+    top: 19px;
+  }
+
+  .navbar .navbar-toggler .toggler-icon:nth-child(4) {
+    top: 26px;
+  }
+
+  .navbar .navbar-toggler.collapsed .toggler-icon:nth-child(1) {
+    top: 12px;
+    transform: rotate(0deg);
+  }
+
+  .navbar .navbar-toggler.collapsed .toggler-icon:nth-child(2),
+  .navbar .navbar-toggler.collapsed .toggler-icon:nth-child(3) {
+    top: 19px;
+    transform: rotate(0deg);
+  }
+
+  .navbar .navbar-toggler.collapsed .toggler-icon:nth-child(4) {
+    top: 26px;
+    transform: rotate(0deg);
+  }
+
+  .navbar .navbar-toggler:not(.collapsed) .toggler-icon:nth-child(1) {
+    top: 19px;
+    width: 0%;
+    left: 50%;
+  }
+
+  .navbar .navbar-toggler:not(.collapsed) .toggler-icon:nth-child(2) {
+    transform: rotate(45deg);
+  }
+
+  .navbar .navbar-toggler:not(.collapsed) .toggler-icon:nth-child(3) {
+    transform: rotate(-45deg);
+  }
+
+  .navbar .navbar-toggler:not(.collapsed) .toggler-icon:nth-child(4) {
+    top: 19px;
+    width: 0%;
+    left: 50%;
+  }
+  
+  .navbar .navbar-nav .nav-link {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .navbar .dropdown-menu {
+    border-radius: 0;
+    box-shadow: none;
+    padding-left: 1rem;
+  }
+  
+  .navbar-collapse {
+    padding: 1rem 0;
+  }
+  
+  .navbar .btn-outline-light {
+    display: block;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  
+  .navbar .dropdown {
+    position: static;
+  }
+  
+  .navbar .dropdown-menu {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+  
+  .navbar .dropdown-toggle::after {
+    float: right;
+    margin-top: 10px;
+    transition: transform 0.3s ease;
+  }
+  
+  .navbar .dropdown.show .dropdown-toggle::after {
+    transform: rotate(180deg);
+  }
+  
+  /* Animation for navbar collapse */
+  .navbar-collapse {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+  
+  .navbar-collapse.collapsing {
+    max-height: none;
+  }
+  
+  .navbar-collapse.show {
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+}
+
+/* Smaller screens navbar adjustments */
+@media (max-width: 767.98px) {
+  .navbar, .main-container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .navbar .container-fluid {
+    padding: 0;
+  }
+  
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+  
+  .navbar .d-flex.align-items-center {
+    flex-direction: column;
+    align-items: flex-start !important;
+    width: 100%;
+  }
+  
+  .navbar .dropdown {
+    width: 100%;
+  }
+  
+  .navbar .dropdown-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .navbar #userDropdown {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 0.5rem;
+  }
+  
+  .navbar #openDebugBtn {
+    width: 100%;
+  }
+  
+  /* Improve touch targets for nav items */
+  .navbar .nav-link {
+    padding: 0.75rem !important;
+    margin-bottom: 0.25rem;
+    border-radius: 8px;
+    background-color: rgba(255,255,255,0.05);
+  }
+  
+  .navbar .dropdown-item {
+    padding: 0.75rem 1rem;
+  }
+  
+  /* Utility classes for responsive display */
+  .d-mobile-none {
+    display: none !important;
+  }
+  
+  .d-mobile-block {
+    display: block !important;
+  }
+  
+  .text-mobile-center {
+    text-align: center !important;
+  }
+  
+  .w-mobile-100 {
+    width: 100% !important;
+  }
+  
+  .mx-mobile-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  
+  .flex-mobile-column {
+    flex-direction: column !important;
+  }
+}
+
+/* Footer responsive styles for tablets and smaller devices */
+@media (max-width: 991.98px) {
+  footer .container-fluid {
+    padding: 0 1rem;
+  }
+
+  footer .py-4 {
+    padding-top: 2rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  footer .row.g-4 {
+    row-gap: 1.5rem !important;
+  }
+
+  footer .footer-header {
+    margin-bottom: 1rem !important;
+  }
+
+  footer .input-group {
+    max-width: 100%;
+  }
+}
+
+/* Footer responsive styles for mobile screens */
+@media (max-width: 767.98px) {
+  footer {
+    text-align: center;
+  }
+
+  footer .footer-brand {
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  footer .d-flex.gap-2 {
+    justify-content: center;
+  }
+
+  footer .footer-links {
+    padding-left: 1rem;
+  }
+
+  footer .d-flex.align-items-center {
+    justify-content: center;
+  }
+
+  footer .border-bottom {
+    padding-bottom: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  footer .input-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  footer .input-group > .form-control, 
+  footer .input-group > .form-floating, 
+  footer .input-group > .form-select {
+      width: 100% !important; /* Force full width */
+      flex: 1 1 100% !important; /* Adjust flex basis */
+      min-width: unset !important; /* Remove min-width restrictions */
+      margin-bottom: 0.5rem; /* Add spacing between input and button */
+  }
+
+  footer .input-group .btn {
+    width: 100%;
+  }
+}
+
+/* Footer responsive styles for extra small devices */
+@media (max-width: 575.98px) {
+  footer {
+    padding: 1.5rem 0 !important;
+  }
+
+  footer .footer-header {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    cursor: pointer;
+  }
+
+  footer .footer-header:after {
+    content: '+';
+    position: absolute;
+    right: 10px;
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+  }
+
+  footer .footer-header.collapsed:after {
+    transform: rotate(45deg);
+  }
+
+  footer .footer-links {
+    display: none; /* Initially hidden for collapsible effect */
+  }
+
+  footer .footer-header.collapsed + .footer-links {
+    display: block; /* Show on click */
+  }
+
+  footer .input-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  footer .input-group .form-control {
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+  }
+
+  footer .input-group .btn {
+    border-radius: 0.25rem;
+    width: 100%;
+  }
+
+  footer .d-flex.flex-wrap.gap-3 {
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  footer .text-light.opacity-50 {
+    display: none;
+  }
+
+  footer .d-flex.align-items-center.justify-content-md-end {
+    flex-direction: column;
+    gap: 0.75rem !important;
+  }
+}
+
+/* Table responsive behavior */
+@media (max-width: 767.98px) {
+  /* Make tables scroll horizontally on mobile */
+  .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Camera grid fixes */
+  .camera-feed-container {
+    margin-bottom: 1.5rem;
+  }
+  
+  .camera-header {
+    flex-wrap: wrap;
+  }
+  
+  .camera-controls {
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+  
+  /* Improve form field behavior on mobile */
+  .form-control, .form-select {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+  
+  /* Better spacing for stacked elements */
+  .main-container section {
+    padding-bottom: 1rem;
+  }
+  
+  .main-container .card-header {
+    padding: 0.75rem;
+  }
+  
+  .main-container .card-body {
+    padding: 0.75rem;
+  }
+  
+  /* Stacked stats on mobile */
+  .main-container .stat-card {
+    margin-bottom: 1rem;
+  }
+  
+  /* More responsive button groups */
+  .btn-group-responsive {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .btn-group-responsive > .btn {
+    flex: 1 1 auto;
+    margin-bottom: 0.25rem;
+  }
+  
+  /* Make modals more mobile-friendly */
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  /* Responsive table list view - makes tables stack as lists on mobile */
+  .table-responsive-stack thead {
+    display: none;
+  }
+  
+  .table-responsive-stack tr {
+    display: block;
+    border-bottom: 2px solid #dee2e6;
+    margin-bottom: 1rem;
+  }
+  
+  .table-responsive-stack td {
+    display: block;
+    text-align: right;
+    border-bottom: 1px dotted #dee2e6;
+    position: relative;
+    padding-left: 40%;
+  }
+  
+  .table-responsive-stack td:before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0.75rem;
+    width: 35%;
+    padding-right: 0.625rem;
+    text-align: left;
+    font-weight: bold;
+  }
+}
+
+/* Extra small device fixes */
+@media (max-width: 575.98px) {
+  /* Stack all columns on very small screens */
+  .col-sm-6, .col-sm-4, .col-sm-3 {
+    width: 100%;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  
+  /* Make footer stack items on mobile */
+  footer .row {
+    text-align: center;
+  }
+  
+  footer .col-md-6:last-child {
+    text-align: center !important;
+    margin-top: 1rem;
+  }
+  
+  /* Reduce heading sizes on mobile */
+  h5 {
+    font-size: 1.1rem;
+  }
+  
+  /* Improve spacing and sizing */
+  .main-container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .dashboard-card {
+    margin-bottom: 1rem;
+  }
+  
+  /* Reduce button sizes on mobile */
+  .btn {
+    padding: 0.375rem 0.5rem;
+  }
+  
+  .btn-sm {
+    padding: 0.25rem 0.4rem;
+  }
+  
+  /* Improve incident banner for mobile */
+  .alert {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Make incidents table more readable on mobile */
+  .incidents-table td {
+    padding: 0.5rem 0.375rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Camera monitor section specific fixes */
+@media (max-width: 767.98px) {
+  /* Stack camera feeds on mobile */
+  #monitoring .col-md-3,
+  #monitoring .col-md-4,
+  #monitoring .col-md-8 {
+    width: 100%;
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  /* Improve camera control buttons on mobile */
+  .camera-controls .btn-group {
+    margin-right: 0.5rem;
+  }
+  
+  .camera-controls .btn {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Better status indicators on mobile */
+  .camera-status-indicator,
+  .badge {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  /* Better camera header layout */
+  .camera-header h6 {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Proper camera status bar layout */
+  .camera-status-bar {
+    font-size: 0.75rem;
+  }
+}
+
+/* Fix the video controls for touch devices */
+@media (hover: none) {
+  .video-controls {
+    opacity: 1 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+  }
+  
+  .video-controls .btn {
+    padding: 0.4rem 0.6rem !important;
+  }
+}
+
+/* Dashboard widgets responsive fixes */
+@media (max-width: 991.98px) {
+  .stat-card {
+    padding: 0.75rem;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .analysis-section {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Improved form controls on touch devices */
+@media (max-width: 767.98px) {
+  input[type="range"] {
+    height: 1.5rem;  /* Larger touch target */
+  }
+  
+  .form-range::-webkit-slider-thumb {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  /* Make dropdowns easier to tap */
+  .dropdown-item {
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Ensure footer aligns with navbar and main container */
+.footer-bg .container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  width: 100%;
+}
+
+@media (max-width: 991.98px) {
+  /* Fix container alignment for all major sections */
+  .navbar,
+  .main-container,
+  footer .container {
+    box-sizing: border-box;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .footer-bg .container {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+  
+  .footer-bg .container-fluid {
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .navbar,
+  .main-container,
+  .footer-bg .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .footer-bg .container-fluid {
+    padding: 0 0.5rem;
+  }
+  
+  .navbar .container-fluid {
+    padding: 0;
+  }
+}
+
+/* Fix navbar alignment with main-container */
+@media (max-width: 991.98px) {
+  .navbar {
+    padding: 0.75rem 1rem;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Override Bootstrap default navbar behaviors */
+.navbar-toggler:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.navbar-collapse {
+  transition: height 0.35s ease;
+  overflow: visible !important; /* Prevent scrollbars */
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* Fix dropdown behavior - consolidated styles */
+.navbar .dropdown-menu {
+  position: absolute !important;
+  z-index: 9999 !important; /* Very high z-index to ensure it's on top */
+  margin-top: 0.5rem !important;
+  border: none !important;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  max-height: none !important;
+  overflow: visible !important;
+  display: none !important; /* Hidden by default */
+}
+
+.navbar .dropdown-menu.show {
+  display: block !important; /* Only show when toggled */
+}
+
+.navbar .dropdown-menu.dropdown-menu-end {
+  right: 0 !important;
+  left: auto !important;
+}
+
+/* Override Bootstrap modal z-index to be lower than navbar dropdown */
+.modal {
+  z-index: 1040;
+}
+
+.modal-backdrop {
+  z-index: 1039;
+}
+
+/* Remove redundant duplicate styles */
+
+@media (min-width: 992px) {
+  /* Fix for navbar button not working on larger screens */
+  .navbar-expand-lg .navbar-collapse {
+    display: flex !important; /* Show the navbar on larger screens */
+    overflow: visible !important;
+    height: auto !important;
+  }
+  
+  .navbar-expand-lg .navbar-toggler {
+    display: none !important; /* Hide the toggler on larger screens */
+  }
+  
+  /* Fix dropdown menu behavior on larger screens */
+  .navbar .dropdown-menu {
+    position: absolute;
+    margin-top: 0.5rem;
+    background-color: white;
+    min-width: 10rem;
+    padding: 0.5rem 0;
+  }
+  
+  /* Ensure the user dropdown behaves correctly */
+  .navbar .dropdown {
+    position: relative;
+  }
+}
+
+/* Make sure toggler is always visible on smaller screens */
+@media (max-width: 991.98px) {
+  .navbar-toggler {
+    display: block !important;
+    margin-left: auto;
+  }
+  
+  .navbar-collapse {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    z-index: 1000;
+    background-color: var(--primary-color);
+    padding: 1rem;
+    width: 100%;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    max-height: calc(100vh - 60px) !important; /* Limit height but prevent cut-off */
+    overflow-y: auto !important; /* Allow scrolling if needed */
+  }
+  
+  .navbar .navbar-nav {
+    margin-bottom: 1rem;
+  }
+  
+  /* Custom toggler animation */
+  .navbar-toggler.collapsed .toggler-icon:nth-child(1) {
+    top: 12px;
+    transform: rotate(0deg);
+  }
+
+  .navbar-toggler.collapsed .toggler-icon:nth-child(2),
+  .navbar-toggler.collapsed .toggler-icon:nth-child(3) {
+    top: 19px;
+    transform: rotate(0deg);
+  }
+
+  .navbar-toggler.collapsed .toggler-icon:nth-child(4) {
+    top: 26px;
+    transform: rotate(0deg);
+  }
+  
+  .navbar-toggler:not(.collapsed) .toggler-icon:nth-child(1) {
+    top: 19px;
+    width: 0%;
+    left: 50%;
+  }
+
+  .navbar-toggler:not(.collapsed) .toggler-icon:nth-child(2) {
+    transform: rotate(45deg);
+  }
+
+  .navbar-toggler:not(.collapsed) .toggler-icon:nth-child(3) {
+    transform: rotate(-45deg);
+  }
+
+  .navbar-toggler:not(.collapsed) .toggler-icon:nth-child(4) {
+    top: 19px;
+    width: 0%;
+    left: 50%;
+  }
+}
+
+/* Explicitly fix the navbar dropdown positioning issue */
+.navbar .dropdown {
+  position: relative !important; /* Changed from static to relative for better positioning */
+}
+
+@media (max-width: 991.98px) {
+  .navbar .dropdown {
+    position: static !important; /* Use static positioning for parent on mobile */
+  }
+  
+  .navbar .dropdown-menu {
+    width: 100% !important;
+    margin-top: 0.25rem !important;
+    position: relative !important;
+    border: none !important;
+    box-shadow: none !important;
+    background-color: rgba(255,255,255,0.05) !important;
+    padding: 0 !important;
+    overflow-y: visible !important;
+    max-height: none !important;
+  }
+  
+  .navbar .dropdown-menu .dropdown-item {
+    color: rgba(255,255,255,0.8) !important;
+    padding: 0.5rem 1rem !important;
+  }
+  
+  .navbar .dropdown-menu .dropdown-item:hover {
+    background-color: rgba(255,255,255,0.1) !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .navbar .dropdown-menu {
+    position: absolute !important;
+    margin-top: 0.25rem !important;
+    background-color: white !important; 
+    border: none !important;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    min-width: 10rem !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0.5rem 0 !important;
+  }
+  
+  .navbar .dropdown-menu.dropdown-menu-end {
+    right: 0 !important;
+    left: auto !important;
+  }
+  
+  /* Specific override for user dropdown */
+  #userDropdown + .dropdown-menu {
+    position: absolute !important;
+    inset: auto !important;
+    transform: none !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+    margin-top: 0.25rem !important;
+    max-height: none !important;
+    overflow: visible !important;
+    z-index: 9999 !important;
+  }
+} 
+@media (max-width: 767.98px) {
+  .move-right-mobile {
+    display: flex !important;
+    justify-content: flex-end !important;
+    text-align: right !important;
+  }
+}

@@ -766,5 +766,3 @@ def generate_sample_data(request):
         return HttpResponse(f"Generated {data_count} traffic data points successfully!")
     except Exception as e:
         return HttpResponse(f"Error generating data: {str(e)}") 
-    
-    

@@ -1,0 +1,426 @@
+/**
+ * Theme Styles
+ * Provides light and dark theme variables and styling
+ */
+
+/* Root variables for light theme (default) */
+:root {
+  --primary-color: #2969cb;
+  --primary-hover: #215bab;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  
+  /* Background colors */
+  --bg-main: #f8f9fa;
+  /* Preserve original card background color */
+  --bg-navbar: #2969cb;
+  --bg-footer: #343a40;
+  
+  /* Text colors */
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-light: #f8f9fa;
+  --text-muted: #6c757d;
+  
+  /* Border colors */
+  --border-color: #dee2e6;
+  --border-hover: #adb5bd;
+  
+  /* Shadow */
+  --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  
+  /* Chart colors */
+  --chart-grid: #e9ecef;
+  --chart-text: #212529;
+  
+  /* Transition for smooth theme switching */
+  --transition: all 0.3s ease;
+}
+
+/* Dark theme variables */
+body.theme-dark {
+  --primary-color: #3c83e4;
+  --primary-hover: #2969cb;
+  --secondary-color: #6c757d;
+  --success-color: #198754;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #0dcaf0;
+  
+  /* Background colors */
+  --bg-main: #212529;
+  /* We are not changing card background for dark mode, preserving original styling */
+  --bg-navbar: #171a1d;
+  --bg-footer: #121416;
+  
+  /* Text colors */
+  --text-primary: #f8f9fa;
+  --text-secondary: #e9ecef;
+  --text-light: #f8f9fa;
+  --text-muted: #adb5bd;
+  
+  /* Border colors */
+  --border-color: #495057;
+  --border-hover: #6c757d;
+  
+  /* Shadow */
+  --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+  
+  /* Chart colors */
+  --chart-grid: #495057;
+  --chart-text: #f8f9fa;
+}
+
+/* Theme application */
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  transition: var(--transition);
+}
+
+/* Main container in dark mode - background removed */
+body.theme-dark .main-container {
+  color: var(--text-primary);
+}
+
+/* Dashboard cards and elements in dark mode */
+body.theme-dark .dashboard-card {
+  background-color: #121212;
+  border-color: #333;
+}
+
+body.theme-dark .card-body {
+  background-color: #121212;
+}
+
+body.theme-dark .chart-container {
+  background-color: #1e1e1e;
+}
+
+body.theme-dark .analysis-section {
+  background-color: #1e1e1e;
+}
+
+body.theme-dark .camera-feed-container {
+  background-color: #1e1e1e;
+}
+
+body.theme-dark .incident-logs,
+body.theme-dark .settings-card {
+  background-color: #1e1e1e;
+}
+
+body.theme-dark .card {
+  background-color: #1e1e1e;
+}
+
+/* Make prediction label black in dark mode */
+body.theme-dark .predict-color {
+  color: #000000 !important;
+}
+
+/* Navbar styling */
+.navbar {
+  background-color: var(--bg-navbar) !important;
+  transition: var(--transition);
+}
+
+/* Cards styling - removed background color override */
+.dashboard-card, .card, .settings-card {
+  /* Keep original background color */
+  border-color: var(--border-color);
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.card-header {
+  /* Keep original background color */
+  border-bottom-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+/* Stats cards - keep original styling */
+.stat-card {
+  /* Original styling preserved */
+  display: block; /* Add minimal valid declaration */
+}
+
+.stat-title {
+  color:white;
+}
+
+.stat-value {
+  /* Original styling preserved */
+  display: block; /* Add minimal valid declaration */
+}
+
+/* Tables */
+.table {
+  color: var(--text-primary);
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.075);
+}
+
+/* Forms */
+.form-control, .form-select {
+  /* Keep original background color */
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-color);
+}
+
+/* Footer */
+
+/* Chart adjustments */
+.chart-wrapper canvas {
+  filter: none;
+  transition: var(--transition);
+}
+
+/* For dark mode, apply slight contrast filter to charts */
+body.theme-dark .chart-wrapper canvas {
+  filter: brightness(0.9);
+}
+
+/* Other elements */
+.dropdown-menu {
+  /* Keep original background color */
+  border-color: var(--border-color);
+}
+
+.dropdown-item {
+  color: var(--text-primary);
+}
+
+.dropdown-item:hover {
+  background-color: rgba(0, 0, 0, 0.075);
+}
+
+/* Buttons */
+.btn-outline-light {
+  border-color: var(--text-light);
+  color: var(--text-light);
+}
+
+.btn-outline-dark {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+/* Modals */
+.modal-content {
+  /* Keep original background color */
+  color: var(--text-primary);
+}
+
+/* Fix for inputs in dark mode */
+body.theme-dark input::placeholder, 
+body.theme-dark textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* Fix text colors in dark mode to prevent white-on-white */
+body.theme-dark .form-control,
+body.theme-dark .form-select,
+body.theme-dark .form-check-label,
+body.theme-dark input[type="text"],
+body.theme-dark input[type="email"],
+body.theme-dark input[type="password"],
+body.theme-dark input[type="number"],
+body.theme-dark input[type="date"],
+body.theme-dark input[type="datetime-local"],
+body.theme-dark textarea {
+  color: #f8f9fa !important; /* Light text on dark backgrounds */
+  background-color: #333 !important;
+  border-color: #555 !important;
+}
+
+/* Fix dropdown menus in dark mode */
+body.theme-dark .dropdown-menu {
+  background-color: #212529 !important;
+  border-color: #495057 !important;
+}
+
+body.theme-dark .dropdown-item {
+  color: #f8f9fa !important;
+}
+
+body.theme-dark .dropdown-item:hover {
+  background-color: #2c3136 !important;
+}
+
+/* Fix cards and content backgrounds */
+body.theme-dark .card,
+body.theme-dark .card-body,
+body.theme-dark .modal-content,
+body.theme-dark .modal-header,
+body.theme-dark .modal-body,
+body.theme-dark .modal-footer {
+  background-color: #212529 !important;
+  border-color: #495057 !important;
+}
+
+/* Fix tables in dark mode */
+body.theme-dark .table {
+  color: #f8f9fa !important;
+}
+
+body.theme-dark .table thead th {
+  border-color: #495057 !important;
+  background-color: #1e2124 !important;
+}
+
+body.theme-dark .table-hover tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.075) !important;
+}
+
+/* Fix badges in dark mode */
+body.theme-dark .badge:not([class*="bg-"]) {
+  background-color: #495057 !important;
+  color: #f8f9fa !important;
+}
+
+/* Improve buttons visibility in dark mode */
+body.theme-dark .btn-outline-secondary {
+  color: #ced4da !important;
+  border-color: #6c757d !important;
+}
+
+body.theme-dark .btn-outline-secondary:hover {
+  background-color: #6c757d !important;
+  color: #fff !important;
+}
+
+/* Main intersection position toggle - Removed as buttons are no longer used */
+/*
+.col-md-8, .col-md-4 {
+  transition: order 0.4s ease-in-out;
+}
+
+.main-camera {
+  transition: all 0.4s ease-in-out;
+}
+
+.col-md-8[style*="order: 0"] {
+  order: 0 !important;
+}
+
+.col-md-8[style*="order: 1"] {
+  order: 1 !important;
+}
+
+.col-md-4 {
+  order: 0;
+}
+*/ 
+
+/* Improve buttons visibility in dark mode */
+body.theme-dark .btn-outline-secondary {
+  color: #ced4da !important;
+  border-color: #6c757d !important;
+}
+
+body.theme-dark .btn-outline-secondary:hover {
+  background-color: #6c757d !important;
+  color: #fff !important;
+}
+
+/* Fix dashboard-specific elements */
+body.theme-dark .dashboard-card {
+  background-color: #1e1e1e !important;
+}
+
+body.theme-dark .card-header h5 {
+  color: #f8f9fa !important;
+}
+
+body.theme-dark .analysis-section h6,
+body.theme-dark .card-header h6 {
+  color: #f8f9fa !important;
+}
+
+body.theme-dark .traffic-analytics-snapshot {
+  background-color: #2c3136 !important;
+}
+
+body.theme-dark .traffic-analytics-snapshot small {
+  color: #adb5bd !important;
+}
+
+body.theme-dark .traffic-analytics-snapshot span {
+  color: #f8f9fa !important;
+}
+
+/* Fix camera controls visibility */
+body.theme-dark .video-controls {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Ensure chart legends are visible */
+body.theme-dark .chart-wrapper .chartjs-legend li span {
+  color: #f8f9fa !important;
+}
+
+/* Fix alert colors */
+body.theme-dark .alert:not([class*="bg-"]) {
+  background-color: #2c3136 !important;
+  color: #f8f9fa !important;
+}
+
+/* Fix form labels and text */
+body.theme-dark label,
+body.theme-dark .form-label,
+body.theme-dark .stat-title,
+body.theme-dark .stat-trend,
+body.theme-dark .text-muted,
+body.theme-dark small,
+body.theme-dark p {
+  color: #d1d5db !important;
+}
+
+/* Fix direction stats text */
+body.theme-dark .direction-stats p {
+  color: #d1d5db !important;
+}
+
+body.theme-dark .direction-stats span {
+  color: #60a5fa !important;
+}
+
+/* Fix button text */
+body.theme-dark .btn-outline-primary {
+  color: #60a5fa !important;
+  border-color: #60a5fa !important;
+}
+
+body.theme-dark .btn-outline-primary:hover {
+  background-color: #60a5fa !important;
+  color: #000 !important;
+}
+
+body.theme-dark .btn-primary {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  color: #fff !important;
+}
+
+/* Fix toggle button labels */
+body.theme-dark .btn-group .btn-outline-primary {
+  color: #60a5fa !important;
+}
+
+body.theme-dark .btn-group .btn-outline-primary.active {
+  background-color: #3b82f6 !important;
+  color: #fff !important;
+}

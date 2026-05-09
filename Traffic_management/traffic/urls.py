@@ -22,6 +22,6 @@ urlpatterns = [
     path('api/traffic-data/analysis/', views.api_traffic_analysis, name='api_traffic_analysis'),
     path('api/traffic-data/historical/', views.api_historical_traffic, name='api_historical_traffic'),
     path('api/traffic-data/generate_dummy_data/', views.generate_dummy_data, name='api-generate-data'),
-path('monitoring/', views.monitoring_view, name='monitoring'),
-path('settings/', views.settings_view, name='settings'),
+    path('monitoring/', views.monitoring_view, name='monitoring'),
+    path('settings/', views.settings_view, name='settings'),
 ]
