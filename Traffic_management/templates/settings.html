@@ -1,208 +1,359 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Settings</title>
-    {% load static %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Settings – TSCS Dashboard</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" rel="stylesheet">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+
+  <style>
+    /* ── Toast Notification (Image 2 style) ─────────────────────────── */
+    .tscs-toast-container {
+      position   : fixed;
+      bottom     : 1.5rem;
+      right      : 1.5rem;
+      z-index    : 9999;
+      min-width  : 300px;
+    }
+
+    .tscs-toast {
+      display        : flex;
+      align-items    : flex-start;
+      gap            : .75rem;
+      background     : #fff;
+      border         : 1px solid #e5e7eb;
+      border-radius  : 10px;
+      box-shadow     : 0 8px 24px rgba(0,0,0,.13);
+      padding        : .85rem 1rem;
+      opacity        : 0;
+      transform      : translateY(16px);
+      transition     : opacity .3s ease, transform .3s ease;
+      pointer-events : none;
+    }
+    .tscs-toast.show {
+      opacity       : 1;
+      transform     : translateY(0);
+      pointer-events: auto;
+    }
+
+    .tscs-toast-icon {
+      width          : 28px;
+      height         : 28px;
+      border-radius  : 50%;
+      display        : flex;
+      align-items    : center;
+      justify-content: center;
+      flex-shrink    : 0;
+      font-size      : .9rem;
+      color          : #fff;
+    }
+    .tscs-toast-icon.success { background: #16a34a; }
+    .tscs-toast-icon.error   { background: #dc2626; }
+    .tscs-toast-icon.info    { background: #2563eb; }
+
+    .tscs-toast-body { flex: 1; }
+    .tscs-toast-title {
+      font-weight  : 700;
+      font-size    : .88rem;
+      margin-bottom: .15rem;
+    }
+    .tscs-toast-title.success { color: #16a34a; }
+    .tscs-toast-title.error   { color: #dc2626; }
+    .tscs-toast-title.info    { color: #2563eb; }
+
+    .tscs-toast-msg  { font-size: .85rem; color: #374151; }
+    .tscs-toast-time { font-size: .75rem; color: #9ca3af; margin-top: .2rem; }
+
+    .tscs-toast-close {
+      background : none;
+      border     : none;
+      color      : #9ca3af;
+      font-size  : 1rem;
+      cursor     : pointer;
+      padding    : 0;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .tscs-toast-close:hover { color: #374151; }
+  </style>
 </head>
 <body>
 
-    <!-- ── Navbar ─────────────────────────────────────────────────────── -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <i class="bi bi-traffic-light me-2"></i>TSCS Dashboard
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+  <!-- ── Navbar ──────────────────────────────────────────────────────── -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'home' %}">
+        <i class="bi bi-traffic-light me-2"></i>TSCS Dashboard
+      </a>
+      <button class="navbar-toggler" type="button"
+              data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false"
+              aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link"        href="{% url 'home' %}">Home</a></li>
+          <li class="nav-item"><a class="nav-link"        href="{% url 'monitoring' %}">Monitoring</a></li>
+          <li class="nav-item"><a class="nav-link active" href="{% url 'settings' %}">Settings</a></li>
+        </ul>
+        <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Main Content ────────────────────────────────────────────────── -->
+  <div class="main-container">
+    <section class="mb-5">
+      <div class="dashboard-card">
+
+        <!-- Card Header -->
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="bi bi-gear me-2"></i>System Settings
+          </h5>
+          <div class="btn-group">
+            <button type="button" class="btn btn-primary btn-sm" id="saveSettings"
+                    aria-label="Save settings">
+              <i class="bi bi-floppy me-1"></i>Save
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'monitoring' %}">Monitoring</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="{% url 'settings' %}">Settings</a></li>
-                </ul>
-                <a href="{% url 'logout' %}" class="btn btn-outline-light">Logout</a>
-            </div>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="resetSettings"
+                    aria-label="Reset settings">
+              <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+            </button>
+          </div>
         </div>
-    </nav>
 
-    <!-- ── Main Content ───────────────────────────────────────────────── -->
-    <div class="main-container">
-        <section class="mb-5">
-            <div class="dashboard-card">
+        <div class="card-body">
+          <div class="row g-4">
 
-                <!-- Card Header with Save / Reset buttons -->
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-gear me-2"></i>System Settings</h5>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-outline-primary btn-sm" id="saveSettings"
-                                aria-label="Save settings">
-                            <i class="bi bi-save me-1"></i>Save
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" id="resetSettings"
-                                aria-label="Reset settings">
-                            <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
-                        </button>
+            <!-- ① Traffic Management ────────────────────────────────── -->
+            <div class="col-lg-6">
+              <form id="trafficSettings" aria-label="Traffic Management Settings" onsubmit="return false;">
+                <div class="settings-card">
+                  <h6><i class="bi bi-traffic-light me-2"></i>Traffic Management</h6>
+
+                  <div class="mb-3">
+                    <label class="form-label" for="congestionThreshold">
+                      Congestion Threshold
+                    </label>
+                    <div class="input-group">
+                      <input type="number" class="form-control"
+                             id="congestionThreshold" name="congestionThreshold"
+                             min="50" max="200" value="100">
+                      <span class="input-group-text">vehicles/min</span>
                     </div>
+                    <div class="form-text">Alert when traffic exceeds this threshold</div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label" for="signalTimingMode">Signal Timing</label>
+                    <select class="form-select" id="signalTimingMode" name="signalTimingMode">
+                      <option value="Dynamic">Dynamic (Auto-adjust)</option>
+                      <option value="Fixed">Fixed</option>
+                      <option value="Peak Hours">Peak Hours</option>
+                      <option value="Off-Peak">Off-Peak</option>
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label" for="emergencyPriority">Emergency Vehicle Priority</label>
+                    <select class="form-select" id="emergencyPriority" name="emergencyPriority">
+                      <option value="High Priority">High Priority</option>
+                      <option value="Medium Priority">Medium Priority</option>
+                      <option value="Low Priority">Low Priority</option>
+                    </select>
+                  </div>
+
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox"
+                           id="enableOptimization" name="enableOptimization" checked>
+                    <label class="form-check-label" for="enableOptimization">
+                      Enable Real-time Optimization
+                    </label>
+                  </div>
                 </div>
+              </form>
+            </div>
 
-                <div class="card-body">
-                    <div class="row g-4">
+            <!-- ② Camera Settings ──────────────────────────────────── -->
+            <div class="col-lg-6">
+              <form id="cameraSettings" aria-label="Camera Settings" onsubmit="return false;">
+                <div class="settings-card">
+                  <h6><i class="bi bi-camera-video me-2"></i>Camera Settings</h6>
 
-                        <!-- ── 1. Traffic Management ───────────────────────────────── -->
-                        <div class="col-lg-6">
-                            <form id="trafficSettings" aria-label="Traffic Management Settings">
-                                <div class="settings-card">
-                                    <h6><i class="bi bi-traffic-light me-2"></i>Traffic Management</h6>
+                  <div class="mb-3">
+                    <label class="form-label" for="cameraQuality">Camera Quality</label>
+                    <select class="form-select" id="cameraQuality" name="cameraQuality">
+                      <option value="High (1080p)">High (1080p)</option>
+                      <option value="Medium (720p)">Medium (720p)</option>
+                      <option value="Low (480p)">Low (480p)</option>
+                    </select>
+                  </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label" for="congestionThreshold">Congestion Threshold</label>
-                                        <input type="range" class="form-range"
-                                               id="congestionThreshold"
-                                               name="congestionThreshold"
-                                               min="50" max="200" value="100">
-                                    </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="recordingDuration">Recording Duration</label>
+                    <select class="form-select" id="recordingDuration" name="recordingDuration">
+                      <option value="24 Hours">24 Hours</option>
+                      <option value="48 Hours">48 Hours</option>
+                      <option value="7 Days">7 Days</option>
+                    </select>
+                  </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label" for="signalTimingMode">Signal Timing Mode</label>
-                                        <select class="form-select" id="signalTimingMode" name="signalTimingMode">
-                                            <option value="Dynamic">Dynamic</option>
-                                            <option value="Fixed">Fixed</option>
-                                            <option value="Peak Hours">Peak Hours</option>
-                                            <option value="Off-Peak">Off-Peak</option>
-                                        </select>
-                                    </div>
+                  <p class="form-label mb-2">Camera Features</p>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox"
+                           id="enableMotion" name="motionDetection" checked>
+                    <label class="form-check-label" for="enableMotion">Motion Detection</label>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox"
+                           id="enableNight" name="nightVision" checked>
+                    <label class="form-check-label" for="enableNight">Night Vision</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox"
+                           id="enableAutoFocus" name="autoFocus" checked>
+                    <label class="form-check-label" for="enableAutoFocus">Auto Focus</label>
+                  </div>
+                </div>
+              </form>
+            </div>
 
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox"
-                                               id="enableOptimization" name="enableOptimization" checked>
-                                        <label class="form-check-label" for="enableOptimization">
-                                            Enable Real-time Optimization
-                                        </label>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
+            <!-- ③ Alert Settings ───────────────────────────────────── -->
+            <div class="col-lg-6">
+              <form id="alertSettings" aria-label="Alert Settings" onsubmit="return false;">
+                <div class="settings-card">
+                  <h6><i class="bi bi-bell me-2"></i>Alert Settings</h6>
 
-                        <!-- ── 2. Camera Settings ──────────────────────────────────── -->
-                        <div class="col-lg-6">
-                            <form id="cameraSettings" aria-label="Camera Settings">
-                                <div class="settings-card">
-                                    <h6><i class="bi bi-camera-video me-2"></i>Camera Settings</h6>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox"
+                           id="alertTraffic" name="alertTraffic" checked>
+                    <label class="form-check-label" for="alertTraffic">Traffic Congestion</label>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox"
+                           id="alertEmergency" name="alertEmergency" checked>
+                    <label class="form-check-label" for="alertEmergency">Emergency Vehicles</label>
+                  </div>
+                  <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox"
+                           id="alertWeather" name="alertWeather" checked>
+                    <label class="form-check-label" for="alertWeather">Weather Conditions</label>
+                  </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label" for="cameraQuality">Camera Quality</label>
-                                        <select class="form-select" id="cameraQuality" name="cameraQuality">
-                                            <option value="High (1080p)">High (1080p)</option>
-                                            <option value="Medium (720p)">Medium (720p)</option>
-                                            <option value="Low (480p)">Low (480p)</option>
-                                        </select>
-                                    </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="alertSound">Alert Sound</label>
+                    <select class="form-select" id="alertSound" name="alertSound">
+                      <option value="Default">Default</option>
+                      <option value="Beep">Beep</option>
+                      <option value="Chime">Chime</option>
+                      <option value="None">None</option>
+                    </select>
+                  </div>
+                </div>
+              </form>
+            </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label" for="recordingDuration">Recording Duration</label>
-                                        <select class="form-select" id="recordingDuration" name="recordingDuration">
-                                            <option value="24 Hours">24 Hours</option>
-                                            <option value="48 Hours">48 Hours</option>
-                                            <option value="7 Days">7 Days</option>
-                                        </select>
-                                    </div>
+            <!-- ④ System Preferences ──────────────────────────────── -->
+            <div class="col-lg-6">
+              <form id="systemSettings" aria-label="System Preferences" onsubmit="return false;">
+                <div class="settings-card">
+                  <h6><i class="bi bi-display me-2"></i>System Preferences</h6>
 
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox"
-                                               id="enableMotion" name="motionDetection" checked>
-                                        <label class="form-check-label" for="enableMotion">Motion Detection</label>
-                                    </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="theme">Theme</label>
+                    <select class="form-select" id="theme" name="theme">
+                      <option value="light">Light</option>
+                      <option value="dark">Dark</option>
+                      <option value="auto">Auto</option>
+                    </select>
+                  </div>
 
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox"
-                                               id="enableNight" name="nightVision" checked>
-                                        <label class="form-check-label" for="enableNight">Night Vision</label>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="refreshRate">Refresh Rate</label>
+                    <select class="form-select" id="refreshRate" name="refreshRate">
+                      <option value="5">5 seconds</option>
+                      <option value="10">10 seconds</option>
+                      <option value="30">30 seconds</option>
+                      <option value="60">1 minute</option>
+                    </select>
+                  </div>
+                </div>
+              </form>
+            </div>
 
-                        <!-- ── 3. Alert Settings ───────────────────────────────────── -->
-                        <div class="col-lg-6">
-                            <form id="alertSettings" aria-label="Alert Settings">
-                                <div class="settings-card">
-                                    <h6><i class="bi bi-bell me-2"></i>Alert Settings</h6>
+          </div><!-- /row -->
+        </div><!-- /card-body -->
+      </div><!-- /dashboard-card -->
+    </section>
+  </div><!-- /main-container -->
 
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox"
-                                               id="alertTraffic" name="alertTraffic" checked>
-                                        <label class="form-check-label" for="alertTraffic">Traffic Congestion</label>
-                                    </div>
+  <!-- ── Toast Container ─────────────────────────────────────────────── -->
+  <div class="tscs-toast-container">
+    <div class="tscs-toast" id="tscs-toast" role="alert" aria-live="polite">
+      <div class="tscs-toast-icon" id="toast-icon">
+        <i class="bi bi-check-lg" id="toast-icon-i"></i>
+      </div>
+      <div class="tscs-toast-body">
+        <div class="tscs-toast-title" id="toast-title">Success</div>
+        <div class="tscs-toast-msg"   id="toast-msg">Settings saved successfully</div>
+        <div class="tscs-toast-time"  id="toast-time">just now</div>
+      </div>
+      <button class="tscs-toast-close" id="toast-close" aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  </div>
 
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox"
-                                               id="alertEmergency" name="alertEmergency" checked>
-                                        <label class="form-check-label" for="alertEmergency">Emergency Vehicles</label>
-                                    </div>
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox"
-                                               id="alertWeather" name="alertWeather" checked>
-                                        <label class="form-check-label" for="alertWeather">Weather Conditions</label>
-                                    </div>
+  <script>
+    /* ── showToast()  –  called by settings-handler.js ────────────────
+       type: 'success' | 'error' | 'info'
+    ───────────────────────────────────────────────────────────────── */
+    const _toast     = document.getElementById('tscs-toast');
+    const _toastIcon = document.getElementById('toast-icon');
+    const _toastIconI= document.getElementById('toast-icon-i');
+    const _toastTitle= document.getElementById('toast-title');
+    const _toastMsg  = document.getElementById('toast-msg');
+    const _toastTime = document.getElementById('toast-time');
+    let   _toastTimer;
 
-                                    <div class="mb-3">
-                                        <label class="form-label" for="alertSound">Alert Sound</label>
-                                        <select class="form-select" id="alertSound" name="alertSound">
-                                            <option value="Default">Default</option>
-                                            <option value="Beep">Beep</option>
-                                            <option value="Chime">Chime</option>
-                                            <option value="None">None</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
+    document.getElementById('toast-close').addEventListener('click', () => {
+      _toast.classList.remove('show');
+    });
 
-                        <!-- ── 4. System Preferences ──────────────────────────────── -->
-                        <div class="col-lg-6">
-                            <form id="systemSettings" aria-label="System Preferences">
-                                <div class="settings-card">
-                                    <h6><i class="bi bi-display me-2"></i>System Preferences</h6>
+    function showToast(message, type = 'success') {
+      const cfg = {
+        success : { label: 'Success', icon: 'bi-check-lg'      },
+        error   : { label: 'Error',   icon: 'bi-x-lg'          },
+        info    : { label: 'Info',    icon: 'bi-info-circle'    },
+      };
+      const c = cfg[type] ?? cfg.success;
 
-                                    <div class="mb-3">
-                                        <label class="form-label" for="theme">Theme</label>
-                                        <select class="form-select" id="theme" name="theme">
-                                            <option value="light">Light</option>
-                                            <option value="dark">Dark</option>
-                                            <option value="auto">Auto</option>
-                                        </select>
-                                    </div>
+      // Reset classes
+      _toastIcon.className  = `tscs-toast-icon ${type}`;
+      _toastIconI.className = `bi ${c.icon}`;
+      _toastTitle.className = `tscs-toast-title ${type}`;
+      _toastTitle.textContent = c.label;
+      _toastMsg.textContent   = message;
+      _toastTime.textContent  = 'just now';
 
-                                    <div class="mb-3">
-                                        <label class="form-label" for="refreshRate">Refresh Rate</label>
-                                        <!-- values are plain numbers so parseInt() works in JS -->
-                                        <select class="form-select" id="refreshRate" name="refreshRate">
-                                            <option value="5">5 seconds</option>
-                                            <option value="10">10 seconds</option>
-                                            <option value="30">30 seconds</option>
-                                            <option value="60">1 minute</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
+      _toast.classList.add('show');
 
-                    </div><!-- /row -->
-                </div><!-- /card-body -->
-            </div><!-- /dashboard-card -->
-        </section>
-    </div><!-- /main-container -->
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => _toast.classList.remove('show'), 4000);
+    }
+  </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'js/settings-handler.js' %}"></script>
+  <!-- Your existing settings-handler.js (unchanged) -->
+  <script src="{% static 'js/settings-handler.js' %}"></script>
 </body>
 </html>
