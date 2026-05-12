@@ -12,79 +12,93 @@
   <link rel="stylesheet" href="{% static 'css/theme.css' %}">
 
   <style>
-    /* ── Toast Notification (Image 2 style) ─────────────────────────── */
     .tscs-toast-container {
-      position   : fixed;
-      bottom     : 1.5rem;
-      right      : 1.5rem;
-      z-index    : 9999;
-      min-width  : 300px;
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 9999;
+      min-width: 320px;
+      max-width: 420px;
     }
 
     .tscs-toast {
-      display        : flex;
-      align-items    : flex-start;
-      gap            : .75rem;
-      background     : #fff;
-      border         : 1px solid #e5e7eb;
-      border-radius  : 10px;
-      box-shadow     : 0 8px 24px rgba(0,0,0,.13);
-      padding        : .85rem 1rem;
-      opacity        : 0;
-      transform      : translateY(16px);
-      transition     : opacity .3s ease, transform .3s ease;
-      pointer-events : none;
+      display: flex;
+      align-items: flex-start;
+      gap: .75rem;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.13);
+      padding: .85rem 1rem;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity .3s ease, transform .3s ease;
+      pointer-events: none;
     }
+
     .tscs-toast.show {
-      opacity       : 1;
-      transform     : translateY(0);
+      opacity: 1;
+      transform: translateY(0);
       pointer-events: auto;
     }
 
     .tscs-toast-icon {
-      width          : 28px;
-      height         : 28px;
-      border-radius  : 50%;
-      display        : flex;
-      align-items    : center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
       justify-content: center;
-      flex-shrink    : 0;
-      font-size      : .9rem;
-      color          : #fff;
+      flex-shrink: 0;
+      font-size: .9rem;
+      color: #fff;
     }
+
     .tscs-toast-icon.success { background: #16a34a; }
     .tscs-toast-icon.error   { background: #dc2626; }
     .tscs-toast-icon.info    { background: #2563eb; }
 
     .tscs-toast-body { flex: 1; }
+
     .tscs-toast-title {
-      font-weight  : 700;
-      font-size    : .88rem;
+      font-weight: 700;
+      font-size: .88rem;
       margin-bottom: .15rem;
     }
+
     .tscs-toast-title.success { color: #16a34a; }
     .tscs-toast-title.error   { color: #dc2626; }
     .tscs-toast-title.info    { color: #2563eb; }
 
-    .tscs-toast-msg  { font-size: .85rem; color: #374151; }
-    .tscs-toast-time { font-size: .75rem; color: #9ca3af; margin-top: .2rem; }
+    .tscs-toast-msg {
+      font-size: .85rem;
+      color: #374151;
+    }
+
+    .tscs-toast-time {
+      font-size: .75rem;
+      color: #9ca3af;
+      margin-top: .2rem;
+    }
 
     .tscs-toast-close {
-      background : none;
-      border     : none;
-      color      : #9ca3af;
-      font-size  : 1rem;
-      cursor     : pointer;
-      padding    : 0;
+      background: none;
+      border: none;
+      color: #9ca3af;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0;
       line-height: 1;
       flex-shrink: 0;
     }
-    .tscs-toast-close:hover { color: #374151; }
+
+    .tscs-toast-close:hover {
+      color: #374151;
+    }
   </style>
 </head>
 <body>
 
-  <!-- ── Navbar ──────────────────────────────────────────────────────── -->
   <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
       <a class="navbar-brand" href="{% url 'home' %}">
@@ -98,8 +112,8 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link"        href="{% url 'home' %}">Home</a></li>
-          <li class="nav-item"><a class="nav-link"        href="{% url 'monitoring' %}">Monitoring</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'monitoring' %}">Monitoring</a></li>
           <li class="nav-item"><a class="nav-link active" href="{% url 'settings' %}">Settings</a></li>
         </ul>
         <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Logout</a>
@@ -107,23 +121,18 @@
     </div>
   </nav>
 
-  <!-- ── Main Content ────────────────────────────────────────────────── -->
   <div class="main-container">
     <section class="mb-5">
       <div class="dashboard-card">
-
-        <!-- Card Header -->
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0">
             <i class="bi bi-gear me-2"></i>System Settings
           </h5>
           <div class="btn-group">
-            <button type="button" class="btn btn-primary btn-sm" id="saveSettings"
-                    aria-label="Save settings">
+            <button type="button" class="btn btn-primary btn-sm" id="saveSettings" aria-label="Save settings">
               <i class="bi bi-floppy me-1"></i>Save
             </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm" id="resetSettings"
-                    aria-label="Reset settings">
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="resetSettings" aria-label="Reset settings">
               <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
             </button>
           </div>
@@ -132,16 +141,13 @@
         <div class="card-body">
           <div class="row g-4">
 
-            <!-- ① Traffic Management ────────────────────────────────── -->
             <div class="col-lg-6">
               <form id="trafficSettings" aria-label="Traffic Management Settings" onsubmit="return false;">
                 <div class="settings-card">
                   <h6><i class="bi bi-traffic-light me-2"></i>Traffic Management</h6>
 
                   <div class="mb-3">
-                    <label class="form-label" for="congestionThreshold">
-                      Congestion Threshold
-                    </label>
+                    <label class="form-label" for="congestionThreshold">Congestion Threshold</label>
                     <div class="input-group">
                       <input type="number" class="form-control"
                              id="congestionThreshold" name="congestionThreshold"
@@ -181,7 +187,6 @@
               </form>
             </div>
 
-            <!-- ② Camera Settings ──────────────────────────────────── -->
             <div class="col-lg-6">
               <form id="cameraSettings" aria-label="Camera Settings" onsubmit="return false;">
                 <div class="settings-card">
@@ -225,7 +230,6 @@
               </form>
             </div>
 
-            <!-- ③ Alert Settings ───────────────────────────────────── -->
             <div class="col-lg-6">
               <form id="alertSettings" aria-label="Alert Settings" onsubmit="return false;">
                 <div class="settings-card">
@@ -260,7 +264,6 @@
               </form>
             </div>
 
-            <!-- ④ System Preferences ──────────────────────────────── -->
             <div class="col-lg-6">
               <form id="systemSettings" aria-label="System Preferences" onsubmit="return false;">
                 <div class="settings-card">
@@ -288,13 +291,12 @@
               </form>
             </div>
 
-          </div><!-- /row -->
-        </div><!-- /card-body -->
-      </div><!-- /dashboard-card -->
+          </div>
+        </div>
+      </div>
     </section>
-  </div><!-- /main-container -->
+  </div>
 
-  <!-- ── Toast Container ─────────────────────────────────────────────── -->
   <div class="tscs-toast-container">
     <div class="tscs-toast" id="tscs-toast" role="alert" aria-live="polite">
       <div class="tscs-toast-icon" id="toast-icon">
@@ -302,8 +304,8 @@
       </div>
       <div class="tscs-toast-body">
         <div class="tscs-toast-title" id="toast-title">Success</div>
-        <div class="tscs-toast-msg"   id="toast-msg">Settings saved successfully</div>
-        <div class="tscs-toast-time"  id="toast-time">just now</div>
+        <div class="tscs-toast-msg" id="toast-msg">Settings saved successfully</div>
+        <div class="tscs-toast-time" id="toast-time">just now</div>
       </div>
       <button class="tscs-toast-close" id="toast-close" aria-label="Close">
         <i class="bi bi-x-lg"></i>
@@ -311,49 +313,47 @@
     </div>
   </div>
 
-  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    /* ── showToast()  –  called by settings-handler.js ────────────────
-       type: 'success' | 'error' | 'info'
-    ───────────────────────────────────────────────────────────────── */
-    const _toast     = document.getElementById('tscs-toast');
-    const _toastIcon = document.getElementById('toast-icon');
-    const _toastIconI= document.getElementById('toast-icon-i');
-    const _toastTitle= document.getElementById('toast-title');
-    const _toastMsg  = document.getElementById('toast-msg');
-    const _toastTime = document.getElementById('toast-time');
-    let   _toastTimer;
+    window._toastTimer = null;
 
-    document.getElementById('toast-close').addEventListener('click', () => {
-      _toast.classList.remove('show');
-    });
+    window.showToast = function(message, type = 'success') {
+      const toast = document.getElementById('tscs-toast');
+      const toastIcon = document.getElementById('toast-icon');
+      const toastIconI = document.getElementById('toast-icon-i');
+      const toastTitle = document.getElementById('toast-title');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastTime = document.getElementById('toast-time');
 
-    function showToast(message, type = 'success') {
       const cfg = {
-        success : { label: 'Success', icon: 'bi-check-lg'      },
-        error   : { label: 'Error',   icon: 'bi-x-lg'          },
-        info    : { label: 'Info',    icon: 'bi-info-circle'    },
+        success: { label: 'Success', icon: 'bi-check-lg' },
+        error: { label: 'Error', icon: 'bi-x-lg' },
+        info: { label: 'Info', icon: 'bi-info-circle' }
       };
-      const c = cfg[type] ?? cfg.success;
 
-      // Reset classes
-      _toastIcon.className  = `tscs-toast-icon ${type}`;
-      _toastIconI.className = `bi ${c.icon}`;
-      _toastTitle.className = `tscs-toast-title ${type}`;
-      _toastTitle.textContent = c.label;
-      _toastMsg.textContent   = message;
-      _toastTime.textContent  = 'just now';
+      const c = cfg[type] || cfg.success;
 
-      _toast.classList.add('show');
+      toastIcon.className = `tscs-toast-icon ${type}`;
+      toastIconI.className = `bi ${c.icon}`;
+      toastTitle.className = `tscs-toast-title ${type}`;
+      toastTitle.textContent = c.label;
+      toastMsg.textContent = message;
+      toastTime.textContent = 'just now';
 
-      clearTimeout(_toastTimer);
-      _toastTimer = setTimeout(() => _toast.classList.remove('show'), 4000);
-    }
+      toast.classList.add('show');
+
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 4000);
+    };
+
+    document.getElementById('toast-close')?.addEventListener('click', function() {
+      document.getElementById('tscs-toast')?.classList.remove('show');
+    });
   </script>
 
-  <!-- Your existing settings-handler.js (unchanged) -->
-  <script src="{% static 'js/settings-handler.js' %}"></script>
+  <script src="{% static 'js/settings_handler.js' %}"></script>
 </body>
 </html>
