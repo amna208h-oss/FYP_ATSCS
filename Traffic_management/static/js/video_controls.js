@@ -1,23 +1,58 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize controls for each video
-    const directions = ['north', 'south', 'east', 'west'];
-    
-    directions.forEach(direction => {
-        const video = document.getElementById(`${direction}Video`);
-        if (!video) return;
+document.addEventListener('DOMContentLoaded', function () {
+    function initVideoControls(videoId, dataKey) {
+        const video = document.getElementById(videoId);
+        if (!video) {
+            console.warn(`[VideoControls] Video element not found: #${videoId}`);
+            return;
+        }
 
-        // Get control elements
-        const playPauseBtn = document.querySelector(`.play-pause-btn[data-video="${direction}"]`);
-        const muteBtn = document.querySelector(`.mute-btn[data-video="${direction}"]`);
-        const fullscreenBtn = document.querySelector(`.fullscreen-btn[data-video="${direction}"]`);
-        const progressBar = document.querySelector(`.video-progress[data-video="${direction}"]`);
-        
-        if (!playPauseBtn || !muteBtn || !fullscreenBtn || !progressBar) return;
+        const playPauseBtn  = document.querySelector(`.play-pause-btn[data-video="${dataKey}"]`);
+        const muteBtn       = document.querySelector(`.mute-btn[data-video="${dataKey}"]`);
+        const fullscreenBtn = document.querySelector(`.fullscreen-btn[data-video="${dataKey}"]`);
+        const progressBar   = document.querySelector(`.video-progress[data-video="${dataKey}"]`);
 
-        // Play/Pause
-        playPauseBtn.addEventListener('click', function() {
+        if (!playPauseBtn || !muteBtn || !fullscreenBtn || !progressBar) {
+            console.warn(`[VideoControls] One or more control elements missing for: ${dataKey}`);
+            return;
+        }
+
+        const controlsContainer = playPauseBtn.closest('.video-controls');
+        if (controlsContainer) {
+            
+            controlsContainer.style.setProperty('z-index', '200', 'important');
+            controlsContainer.style.setProperty('pointer-events', 'all', 'important');
+            controlsContainer.style.setProperty('position', 'absolute', 'important');
+            controlsContainer.style.setProperty('bottom', '0', 'important');
+            controlsContainer.style.setProperty('left', '0', 'important');
+            controlsContainer.style.setProperty('right', '0', 'important');
+
+            [playPauseBtn, muteBtn, fullscreenBtn, progressBar].forEach(el => {
+                el.style.setProperty('pointer-events', 'all', 'important');
+                el.style.setProperty('position', 'relative', 'important');
+                el.style.setProperty('z-index', '201', 'important');
+            });
+        }
+
+        const cameraStream = video.closest('.camera-stream');
+        if (cameraStream) {
+            const metricsOverlay   = cameraStream.querySelector('.real-time-metrics');
+            const detectionOverlay = cameraStream.querySelector('.ai-detection-overlay');
+
+            if (metricsOverlay) {
+                metricsOverlay.style.setProperty('pointer-events', 'none', 'important');
+                // Keep its existing z-index (100) but make sure it cannot swallow clicks
+            }
+            if (detectionOverlay) {
+                // Already has pointer-events: none in HTML, but enforce it here too
+                detectionOverlay.style.setProperty('pointer-events', 'none', 'important');
+            }
+        }
+
+        playPauseBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
             if (video.paused) {
-                video.play();
+                video.play().catch(err => console.warn(`[VideoControls] Play failed (${dataKey}):`, err));
                 this.innerHTML = '<i class="bi bi-pause-fill"></i>';
             } else {
                 video.pause();
@@ -25,95 +60,137 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Mute/Unmute
-        muteBtn.addEventListener('click', function() {
+        video.addEventListener('play',  () => { playPauseBtn.innerHTML = '<i class="bi bi-pause-fill"></i>'; });
+        video.addEventListener('pause', () => { playPauseBtn.innerHTML = '<i class="bi bi-play-fill"></i>';  });
+
+        muteBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
             video.muted = !video.muted;
-            this.innerHTML = video.muted ? 
-                '<i class="bi bi-volume-mute-fill"></i>' : 
-                '<i class="bi bi-volume-up-fill"></i>';
+            this.innerHTML = video.muted
+                ? '<i class="bi bi-volume-mute-fill"></i>'
+                : '<i class="bi bi-volume-up-fill"></i>';
         });
 
-        // Fullscreen
-        fullscreenBtn.addEventListener('click', function() {
+        fullscreenBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
             if (!document.fullscreenElement) {
-                if (video.requestFullscreen) {
-                    video.requestFullscreen();
-                } else if (video.webkitRequestFullscreen) {
-                    video.webkitRequestFullscreen();
-                } else if (video.msRequestFullscreen) {
-                    video.msRequestFullscreen();
+                const container = video.closest('.camera-view') || video;
+                const requestFS = container.requestFullscreen
+                    || container.webkitRequestFullscreen
+                    || container.msRequestFullscreen;
+                if (requestFS) {
+                    requestFS.call(container).catch(err => {
+                        console.warn(`[VideoControls] Fullscreen failed (${dataKey}):`, err);
+                    });
                 }
                 this.innerHTML = '<i class="bi bi-fullscreen-exit"></i>';
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
+                const exitFS = document.exitFullscreen
+                    || document.webkitExitFullscreen
+                    || document.msExitFullscreen;
+                if (exitFS) exitFS.call(document);
                 this.innerHTML = '<i class="bi bi-fullscreen"></i>';
             }
         });
 
-        // Progress bar
-        video.addEventListener('loadedmetadata', function() {
+        video.addEventListener('loadedmetadata', function () {
             progressBar.max = video.duration;
         });
 
-        video.addEventListener('timeupdate', function() {
-            progressBar.value = video.currentTime;
-        });
-
-        progressBar.addEventListener('change', function() {
-            video.currentTime = progressBar.value;
-        });
-
-        // Handle fullscreen change
-        document.addEventListener('fullscreenchange', function() {
-            if (!document.fullscreenElement) {
-                fullscreenBtn.innerHTML = '<i class="bi bi-fullscreen"></i>';
+        video.addEventListener('timeupdate', function () {
+            if (!progressBar.matches(':active')) {
+                progressBar.value = video.currentTime;
             }
         });
 
-        // Auto-restart when ended (if not already looping)
-        video.addEventListener('ended', function() {
+        progressBar.addEventListener('input', function (e) {
+            e.stopPropagation();
+            video.currentTime = parseFloat(this.value);
+        });
+
+        video.addEventListener('ended', function () {
             if (!video.loop) {
                 video.currentTime = 0;
-                video.play();
+                video.play().catch(() => {});
             }
         });
 
-        // Error handling
-        video.addEventListener('error', function() {
-            console.error(`Error loading ${direction} video:`, video.error);
-            video.closest('.camera-stream').querySelector('.camera-fallback').style.display = 'flex';
+        video.addEventListener('error', function () {
+            console.error(`[VideoControls] Error loading video (${dataKey}):`, video.error);
         });
 
-        // Add hover effect for controls
-        const controlsContainer = video.closest('.camera-stream').querySelector('.video-controls');
-        if (controlsContainer) {
+        const cameraView = video.closest('.camera-view');
+
+        if (cameraView && controlsContainer) {
             let hideTimeout;
-            
-            // Show controls on hover
-            video.closest('.camera-view').addEventListener('mouseenter', function() {
-                controlsContainer.style.opacity = '1';
+
+            controlsContainer.style.opacity    = '0';
+            controlsContainer.style.transition = 'opacity 0.3s ease';
+
+            cameraView.addEventListener('mouseenter', function () {
                 clearTimeout(hideTimeout);
+                controlsContainer.style.opacity = '1';
             });
 
-            // Hide controls when mouse leaves
-            video.closest('.camera-view').addEventListener('mouseleave', function() {
-                hideTimeout = setTimeout(() => {
+            cameraView.addEventListener('mouseleave', function () {
+                hideTimeout = setTimeout(function () {
                     controlsContainer.style.opacity = '0';
                 }, 1500);
             });
 
-            // Initially hide controls
-            controlsContainer.style.opacity = '0';
-            controlsContainer.style.transition = 'opacity 0.3s ease';
+            controlsContainer.addEventListener('mouseenter', function () {
+                clearTimeout(hideTimeout);
+                controlsContainer.style.opacity = '1';
+            });
+
+            controlsContainer.addEventListener('mouseleave', function () {
+                hideTimeout = setTimeout(function () {
+                    controlsContainer.style.opacity = '0';
+                }, 1500);
+            });
+
+            cameraView.addEventListener('touchstart', function () {
+                clearTimeout(hideTimeout);
+                controlsContainer.style.opacity = '1';
+                hideTimeout = setTimeout(function () {
+                    controlsContainer.style.opacity = '0';
+                }, 3000);
+            }, { passive: true });
+        }
+
+        console.log(`[VideoControls] Initialised: ${dataKey}`);
+    }
+
+    const directionalVideos = [
+        { id: 'northVideo', key: 'north' },
+        { id: 'southVideo', key: 'south' },
+        { id: 'eastVideo',  key: 'east'  },
+        { id: 'westVideo',  key: 'west'  },
+    ];
+
+    directionalVideos.forEach(function (v) {
+        initVideoControls(v.id, v.key);
+    });
+
+    initVideoControls('mainIntersectionVideo', 'main');
+
+    document.addEventListener('fullscreenchange', function () {
+        if (!document.fullscreenElement) {
+            document.querySelectorAll('.fullscreen-btn').forEach(function (btn) {
+                btn.innerHTML = '<i class="bi bi-fullscreen"></i>';
+            });
         }
     });
 
-    // Log that directional videos are initialized
-    console.log('[VideoControls] Directional video controls initialized');
+    document.addEventListener('webkitfullscreenchange', function () {
+        if (!document.webkitFullscreenElement) {
+            document.querySelectorAll('.fullscreen-btn').forEach(function (btn) {
+                btn.innerHTML = '<i class="bi bi-fullscreen"></i>';
+            });
+        }
+    });
+
+    console.log('[VideoControls] All video controls initialised successfully.');
 });
