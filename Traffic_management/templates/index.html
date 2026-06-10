@@ -8,7 +8,7 @@
     <title>Smart Traffic Management System</title>
     <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij48cmVjdCB4PSIyIiB5PSIxIiB3aWR0aD0iMTIiIGhlaWdodD0iMTQiIHJ4PSIyIiBmaWxsPSIjMzMzIi8+PGNpcmNsZSBjeD0iOCIgY3k9IjQiIHI9IjIiIGZpbGw9IiNmMDAiLz48Y2lyY2xlIGN4PSI4IiBjeT0iOCIgcj0iMiIgZmlsbD0iI2ZmMCIvPjxjaXJjbGUgY3g9IjgiIGN5PSIxMiIgcj0iMiIgZmlsbD0iIzBmMCIvPjwvc3ZnPg==" type="image/svg+xml">
     {% load static %}
-    
+
     <!-- CSS Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
@@ -16,35 +16,35 @@
     <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
     <link rel="stylesheet" href="{% static 'css/theme.css' %}">
     <link rel="stylesheet" href="{% static 'css/dropdown_fix.css' %}">
-    
+
     <!-- Core JS Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'js/dropdown_fix.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Chart.js Canvas Fix -->
     <script>
       (function() {
         console.log("Applying Chart.js canvas conflict fix");
-        
+
         // Store a reference to original Chart
         const OriginalChart = window.Chart;
-        
+
         // Track chart instances by canvas ID
         window.chartInstances = {};
-        
+
         // Override Chart constructor
         window.Chart = function(canvas, config) {
           // Resolve canvas element
           const canvasElement = typeof canvas === 'string' ? document.getElementById(canvas) : canvas;
-          
+
           if (!canvasElement) {
             console.error('Canvas element not found:', canvas);
             return null;
           }
-          
+
           const canvasId = canvasElement.id || 'unnamed-canvas';
-          
+
           // Force cleanup any existing chart on this canvas
           try {
             // First try Chart.js's own registry
@@ -55,7 +55,7 @@
                 existingChart.destroy();
               }
             }
-            
+
             // Also check our own registry
             if (window.chartInstances[canvasId]) {
               console.log(`[ChartFix] Destroying tracked chart on ${canvasId}`);
@@ -66,7 +66,7 @@
               }
               delete window.chartInstances[canvasId];
             }
-            
+
             // Force replace canvas with a new one
             const parent = canvasElement.parentNode;
             if (parent) {
@@ -77,41 +77,41 @@
               newCanvas.style.cssText = canvasElement.style.cssText;
               newCanvas.width = canvasElement.width;
               newCanvas.height = canvasElement.height;
-              
+
               // Replace old canvas with new one
               parent.removeChild(canvasElement);
               parent.appendChild(newCanvas);
               console.log(`[ChartFix] Replaced canvas ${canvasId} with a fresh element`);
-              
+
               // Update reference for chart creation
               canvas = newCanvas;
             }
           } catch (e) {
             console.warn('[ChartFix] Error cleaning up canvas:', e);
           }
-          
+
           // Create new chart with fixed canvas
           console.log(`[ChartFix] Creating new chart on ${canvasId}`);
           const chart = new OriginalChart(canvas, config);
-          
+
           // Store in our registry
           if (chart && canvasId) {
             window.chartInstances[canvasId] = chart;
           }
-          
+
           return chart;
         };
-        
+
         // Copy all static properties from original Chart
         Object.keys(OriginalChart).forEach(key => {
           if (key !== 'prototype' && key !== 'constructor') {
             window.Chart[key] = OriginalChart[key];
           }
         });
-        
+
         // Copy prototype methods
         window.Chart.prototype = OriginalChart.prototype;
-        
+
         // Enhance getChart to be more resilient
         const origGetChart = OriginalChart.getChart;
         window.Chart.getChart = function(canvas) {
@@ -127,16 +127,16 @@
             return null;
           }
         };
-        
+
         console.log("[ChartFix] Chart.js patched successfully");
       })();
     </script>
-    
+
     <!-- Export Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    
+
     <!-- App Scripts -->
     <script src="{% static 'js/time_range_chart.js' %}"></script>
     <script src="{% static 'js/fix_recursion.js' %}"></script>
@@ -159,7 +159,7 @@
   <body>
     <!-- Prevent navbar scrollbar script -->
     <script>
-      // Execute immediately 
+      // Execute immediately
       (function() {
         function removeScrollbars() {
           // Fix navbar scrollbar issues
@@ -169,7 +169,7 @@
             document.querySelector('.navbar-collapse'),
             ...document.querySelectorAll('.dropdown-menu')
           ].filter(el => el); // Filter out null elements
-          
+
           elements.forEach(el => {
             el.style.setProperty('overflow', 'visible', 'important');
             el.style.setProperty('overflow-x', 'visible', 'important');
@@ -177,12 +177,12 @@
             el.style.setProperty('max-height', 'none', 'important');
           });
         }
-        
+
         // Run immediately and after page load
         removeScrollbars();
         window.addEventListener('DOMContentLoaded', removeScrollbars);
         window.addEventListener('load', removeScrollbars);
-        
+
         // Set interval to continuously check for scrollbars in the first few seconds
         let count = 0;
         const interval = setInterval(() => {
@@ -199,7 +199,7 @@
       toastContainerDiv.className = 'toast-container position-fixed bottom-0 end-0 p-3';
       toastContainerDiv.style.zIndex = '9999';
       document.body.appendChild(toastContainerDiv);
-      
+
       // Function to show toast notification
       window.showToast = function(message, type = 'info') {
         // Create toast element
@@ -210,17 +210,17 @@
         toastElement.setAttribute('role', 'alert');
         toastElement.setAttribute('aria-live', 'assertive');
         toastElement.setAttribute('aria-atomic', 'true');
-        
+
         // Determine color based on type
-        const bgColor = type === 'success' ? 'bg-success' : 
-                        type === 'error' || type === 'danger' ? 'bg-danger' : 
+        const bgColor = type === 'success' ? 'bg-success' :
+                        type === 'error' || type === 'danger' ? 'bg-danger' :
                         type === 'warning' ? 'bg-warning' : 'bg-info';
-        
+
         // Set icon based on type
-        const icon = type === 'success' ? 'bi-check-circle-fill' : 
-                    type === 'error' || type === 'danger' ? 'bi-exclamation-circle-fill' : 
+        const icon = type === 'success' ? 'bi-check-circle-fill' :
+                    type === 'error' || type === 'danger' ? 'bi-exclamation-circle-fill' :
                     type === 'warning' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill';
-        
+
         // Create toast content
         toastElement.innerHTML = `
           <div class="toast-header ${bgColor} text-white">
@@ -233,19 +233,19 @@
             ${message}
           </div>
         `;
-        
+
         // Add toast to container
         const toastContainer = document.querySelector('.toast-container');
         if (toastContainer) {
           toastContainer.appendChild(toastElement);
-          
+
           // Initialize and show toast
           const toast = new bootstrap.Toast(toastElement, {
             autohide: true,
             delay: 5000
           });
           toast.show();
-          
+
           // Remove toast element after it's hidden
           toastElement.addEventListener('hidden.bs.toast', function () {
             toastElement.remove();
@@ -254,7 +254,7 @@
           console.error("Toast container not found");
         }
       };
-      
+
       // Override the default alert function to use our toast notifications
       // This will catch any alerts from external JS files
       window.originalAlert = window.alert;
@@ -266,7 +266,7 @@
         return true; // Return true to mimic alert's return value
       };
     </script>
-    
+
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark" style="overflow: visible !important;">
       <div class="container-fluid" style="overflow: visible !important;">
@@ -309,7 +309,7 @@
                 <li><a class="dropdown-item" href="{% url 'logout' %}" id="logoutBtn"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
               </ul>
             </div>
-           
+
           </div>
         </div>
       </div>
@@ -323,108 +323,108 @@
         .main-container .dashboard-card {
           overflow-x: hidden;
         }
-        
+
         .main-container .table-responsive {
           min-height: 0.01%;
           overflow-x: auto;
         }
-        
+
         /* Responsive grid and card adjustments */
         @media (max-width: 991.98px) {
           .main-container .row {
             margin-left: -10px;
             margin-right: -10px;
           }
-          
+
           .main-container .row > [class*="col-"] {
             padding-left: 10px;
             padding-right: 10px;
           }
-          
+
           .main-container .stat-card {
             padding: 0.75rem;
             margin-bottom: 1rem;
           }
-          
+
           .main-container .card-body {
             padding: 0.75rem;
           }
-          
+
           .main-container .chart-container {
             height: 250px !important;
           }
-          
+
           .main-container .camera-view {
             margin-bottom: 1rem;
           }
         }
-        
+
         /* Mobile adjustments */
         @media (max-width: 767.98px) {
           .main-container .row {
             margin-left: -5px;
             margin-right: -5px;
           }
-          
+
           .main-container .row > [class*="col-"] {
             padding-left: 5px;
             padding-right: 5px;
           }
-          
+
           .main-container .card-header {
             display: flex;
             flex-direction: column;
             align-items: flex-start !important;
             padding: 0.75rem;
           }
-          
+
           .main-container .card-header h5 {
             margin-bottom: 0.5rem;
           }
-          
+
           .main-container .card-header .btn-group {
             margin-top: 0.5rem;
             display: flex;
             width: 100%;
           }
-          
+
           .main-container .card-header .btn-group .btn {
             flex: 1;
             padding: 0.25rem 0.5rem;
             font-size: 0.875rem;
           }
-          
+
           .main-container .stat-value {
             font-size: 1.25rem;
           }
-          
+
           .main-container .chart-container {
             height: 200px !important;
           }
-          
+
           /* Fix for camera layout */
           .main-container .camera-feed-container {
             margin-bottom: 1.5rem;
           }
-          
+
           .main-container .camera-header {
             flex-direction: column;
             align-items: flex-start !important;
           }
-          
+
           .main-container .camera-header .camera-controls {
             margin-top: 0.5rem;
             width: 100%;
             justify-content: flex-start;
           }
-          
+
           /* Fix for video controls */
           .main-container .video-controls .btn {
             padding: 0.2rem 0.3rem;
             font-size: 0.75rem;
           }
         }
-        
+
         /* Extra small screens */
         @media (max-width: 575.98px) {
           .main-container .col-md-3,
@@ -436,35 +436,35 @@
             flex: 0 0 100%;
             max-width: 100%;
           }
-          
+
           .main-container .card-header .btn-group {
             flex-wrap: wrap;
           }
-          
+
           .main-container .card-header .btn-group .btn {
             margin-bottom: 0.25rem;
           }
-          
+
           .main-container .traffic-analytics-snapshot {
             flex-direction: column;
           }
-          
+
           .main-container .traffic-analytics-snapshot > div {
             margin-bottom: 0.5rem;
             width: 100%;
           }
-          
+
           /* Adjust incidents table for better mobile viewing */
           .main-container .incidents-table th,
           .main-container .incidents-table td {
             padding: 0.4rem 0.25rem;
             font-size: 0.75rem;
           }
-          
+
           .main-container .incidents-table .btn-group {
             flex-direction: column;
           }
-          
+
           .main-container .incidents-table .btn-group .btn {
             margin-right: 0;
             margin-bottom: 0.125rem;
@@ -499,7 +499,7 @@
           }
         }
       </style>
-      
+
       <!-- Dashboard Section -->
       <section id="home" class="mb-5">
         <div class="row mb-4">
@@ -555,7 +555,7 @@
                   <canvas id="trafficFlowChart"></canvas>
                 </div>
 
-            
+
 
                 <!-- Traffic Statistics -->
                 <div class="row g-4 mb-4">
@@ -664,49 +664,43 @@
                       </span>
                   </div>
                   <div class="camera-controls d-flex">
-                   
+
                     <button type="button" class="btn btn-sm btn-outline-secondary btn-camera-stream-toggle" data-camera-id="north" title="Connect/Disconnect">
                       <i class="bi bi-play-fill"></i>
                     </button>
                   </div>
                 </div>
                 <div class="camera-view ratio ratio-16x9 position-relative">
-                  <div class="camera-stream position-absolute top-0 start-0 w-100 h-100">
-                    <video id="northVideo" class="w-100 h-100 object-fit-cover" autoplay loop muted playsinline>
-                      <source src="{% static 'videos/north.mp4' %}" type="video/mp4">
-                      <!-- Fallback if video fails to load -->
-                    <div class="camera-fallback d-flex flex-column justify-content-center align-items-center text-center p-3 h-100 w-100">
-                      <i class="bi bi-camera-video-off text-secondary mb-2" style="font-size: 2rem;"></i>
-                        <h6 class="text-secondary">Video failed to load</h6>
-                      <button class="btn btn-sm btn-primary btn-reconnect">
-                          <i class="bi bi-arrow-repeat me-1"></i>Retry
-                      </button>
-                    </div>
-                    </video>
-                    
-                    <!-- Video Controls Overlay -->
-                    <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75" style="z-index: 95;">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <button class="btn btn-sm btn-outline-light me-2 play-pause-btn" data-video="north">
-                            <i class="bi bi-pause-fill"></i>
-                          </button>
-                          <button class="btn btn-sm btn-outline-light me-2 mute-btn" data-video="north">
-                            <i class="bi bi-volume-mute-fill"></i>
-                          </button>
-                        </div>
-                        <div class="flex-grow-1 mx-3">
-                          <input type="range" class="form-range video-progress" data-video="north" min="0" value="0" step="0.1">
-                        </div>
-                        <div>
-                          <button class="btn btn-sm btn-outline-light fullscreen-btn" data-video="north">
-                            <i class="bi bi-fullscreen"></i>
-                          </button>
-                        </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+  <div class="camera-stream position-absolute top-0 start-0 w-100 h-100">
+    <video id="northVideo" class="w-100 h-100 object-fit-cover" autoplay loop muted playsinline>
+      <source src="https://res.cloudinary.com/dsjaojzgv/video/upload/v1781090486/east_naku3w.mp4" type="video/mp4">
+    </video>
+
+    <!-- Video Controls Overlay -->
+    <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75" style="z-index: 95;">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <button class="btn btn-sm btn-outline-light me-2 play-pause-btn" data-video="north">
+            <i class="bi bi-pause-fill"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-light me-2 mute-btn" data-video="north">
+            <i class="bi bi-volume-mute-fill"></i>
+          </button>
+        </div>
+        <div class="flex-grow-1 mx-3">
+          <input type="range" class="form-range video-progress" data-video="north" min="0" value="0" step="0.1">
+        </div>
+        <div>
+          <button class="btn btn-sm btn-outline-light fullscreen-btn" data-video="north">
+            <i class="bi bi-fullscreen"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
                 <div class="d-flex align-items-center justify-content-between mt-1">
                   <small class="text-muted">Flow Status:</small>
                   <div class="progress flex-grow-1 mx-2" style="height: 6px;">
@@ -715,7 +709,7 @@
                   <small class="text-success">Normal</small>
                     </div>
                   </div>
-                  
+
               <!-- South Bound -->
               <div class="camera-feed-container mb-4">
                 <div class="camera-header d-flex justify-content-between align-items-center mb-3">
@@ -727,7 +721,7 @@
                     </span>
                   </div>
                   <div class="camera-controls d-flex">
-                    
+
                     <button type="button" class="btn btn-sm btn-outline-secondary btn-camera-stream-toggle" data-camera-id="south" title="Connect/Disconnect">
                       <i class="bi bi-play-fill"></i>
                     </button>
@@ -735,18 +729,10 @@
                 </div>
                 <div class="camera-view ratio ratio-16x9 position-relative">
                   <div class="camera-stream position-absolute top-0 start-0 w-100 h-100">
-                    <video id="southVideo" class="w-100 h-100 object-fit-cover" autoplay loop muted playsinline>
-                      <source src="{% static 'videos/south.mp4' %}" type="video/mp4">
-                      <!-- Fallback if video fails to load -->
-                    <div class="camera-fallback d-flex flex-column justify-content-center align-items-center text-center p-3 h-100 w-100">
-                      <i class="bi bi-camera-video-off text-secondary mb-2" style="font-size: 2rem;"></i>
-                        <h6 class="text-secondary">Video failed to load</h6>
-                      <button class="btn btn-sm btn-primary btn-reconnect">
-                          <i class="bi bi-arrow-repeat me-1"></i>Retry
-                      </button>
-                    </div>
-                    </video>
-                    
+                   <video id="southVideo" class="w-100 h-100 object-fit-cover" autoplay loop muted playsinline>
+                   <source src="https://res.cloudinary.com/dsjaojzgv/video/upload/v1781090515/north_xrz0eb.mp4" type="video/mp4">
+                   </video>
+
                     <!-- Video Controls Overlay -->
                     <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75" style="z-index: 95;">
                       <div class="d-flex justify-content-between align-items-center">
@@ -790,7 +776,7 @@
                     </span>
                   </div>
                   <div class="camera-controls d-flex">
-                    
+
                     <button type="button" class="btn btn-sm btn-outline-secondary btn-camera-stream-toggle" data-camera-id="east" title="Connect/Disconnect">
                       <i class="bi bi-play-fill"></i>
                     </button>
@@ -799,17 +785,9 @@
                 <div class="camera-view ratio ratio-16x9 position-relative">
                   <div class="camera-stream position-absolute top-0 start-0 w-100 h-100">
                     <video id="eastVideo" class="w-100 h-100 object-fit-cover" autoplay loop muted playsinline>
-                      <source src="{% static 'videos/east.mp4' %}" type="video/mp4">
-                      <!-- Fallback if video fails to load -->
-                    <div class="camera-fallback d-flex flex-column justify-content-center align-items-center text-center p-3 h-100 w-100">
-                      <i class="bi bi-camera-video-off text-secondary mb-2" style="font-size: 2rem;"></i>
-                        <h6 class="text-secondary">Video failed to load</h6>
-                      <button class="btn btn-sm btn-primary btn-reconnect">
-                          <i class="bi bi-arrow-repeat me-1"></i>Retry
-                      </button>
-                    </div>
+                    <source src="https://res.cloudinary.com/dsjaojzgv/video/upload/v1781090486/east_naku3w.mp4" type="video/mp4">
                     </video>
-                    
+
                     <!-- Video Controls Overlay -->
                     <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75" style="z-index: 95;">
                       <div class="d-flex justify-content-between align-items-center">
@@ -853,7 +831,7 @@
                     </span>
                   </div>
                   <div class="camera-controls d-flex">
-                   
+
                     <button type="button" class="btn btn-sm btn-outline-secondary btn-camera-stream-toggle" data-camera-id="west" title="Connect/Disconnect">
                       <i class="bi bi-play-fill"></i>
                     </button>
@@ -862,17 +840,9 @@
                 <div class="camera-view ratio ratio-16x9 position-relative">
                   <div class="camera-stream position-absolute top-0 start-0 w-100 h-100">
                     <video id="westVideo" class="w-100 h-100 object-fit-cover" autoplay loop muted playsinline>
-                      <source src="{% static 'videos/west.mp4' %}" type="video/mp4">
-                      <!-- Fallback if video fails to load -->
-                    <div class="camera-fallback d-flex flex-column justify-content-center align-items-center text-center p-3 h-100 w-100">
-                      <i class="bi bi-camera-video-off text-secondary mb-2" style="font-size: 2rem;"></i>
-                        <h6 class="text-secondary">Video failed to load</h6>
-                      <button class="btn btn-sm btn-primary btn-reconnect">
-                          <i class="bi bi-arrow-repeat me-1"></i>Retry
-                      </button>
-                    </div>
+                    <source src="https://res.cloudinary.com/dsjaojzgv/video/upload/v1781090527/west_b6jud8.mp4" type="video/mp4">
                     </video>
-                    
+
                     <!-- Video Controls Overlay -->
                     <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75" style="z-index: 95;">
                       <div class="d-flex justify-content-between align-items-center">
@@ -922,44 +892,36 @@
                     </span>
                     </div>
                   </div>
-                 
+
                 </div>
                 <div class="camera-view ratio ratio-16x9 position-relative">
                   <div class="camera-stream position-absolute top-0 start-0 w-100 h-100">
                     <!-- Replace fallback with video -->
                     <video id="mainIntersectionVideo" class="w-100 h-100 object-fit-cover" autoplay loop muted playsinline>
-                      <source src="{% static 'videos/simulation2.mp4' %}" type="video/mp4">
-                      <!-- Fallback if video fails to load -->
-                    <div class="camera-fallback d-flex flex-column justify-content-center align-items-center text-center p-3 h-100 w-100">
-                      <i class="bi bi-camera-video-off text-secondary mb-2" style="font-size: 2rem;"></i>
-                        <h6 class="text-secondary">Video failed to load</h6>
-                      <button class="btn btn-sm btn-primary btn-reconnect">
-                          <i class="bi bi-arrow-repeat me-1"></i>Retry
-                      </button>
-                    </div>
-                    </video>
-                    
+                    <source src="https://res.cloudinary.com/dsjaojzgv/video/upload/v1781091125/Video_Project_1_rjz2vd.mp4" type="video/mp4">
+                     </video>
+
                     <!-- Video Controls Overlay -->
                     <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75" style="z-index: 95;">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <button class="btn btn-sm btn-outline-light me-2" id="playPauseBtn">
-                            <i class="bi bi-pause-fill"></i>
-                          </button>
-                          <button class="btn btn-sm btn-outline-light me-2" id="muteBtn">
-                            <i class="bi bi-volume-mute-fill"></i>
-                          </button>
-                        </div>
-                        <div class="flex-grow-1 mx-3">
-                          <input type="range" class="form-range" id="videoProgress" min="0" value="0" step="0.1">
-                        </div>
-                        <div>
-                          <button class="btn btn-sm btn-outline-light" id="fullscreenBtn">
-                            <i class="bi bi-fullscreen"></i>
-                          </button>
-                        </div>
-                      </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                     <div>
+                    <button class="btn btn-sm btn-outline-light me-2 play-pause-btn" data-video="main">
+                    <i class="bi bi-pause-fill"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light me-2 mute-btn" data-video="main">
+                    <i class="bi bi-volume-mute-fill"></i>
+                    </button>
                     </div>
+                    <div class="flex-grow-1 mx-3">
+                    <input type="range" class="form-range video-progress" data-video="main" min="0" value="0" step="0.1">
+                     </div>
+                    <div>
+                   <button class="btn btn-sm btn-outline-light fullscreen-btn" data-video="main">
+                   <i class="bi bi-fullscreen"></i>
+                   </button>
+                   </div>
+                   </div>
+                   </div>
 
                     <div class="real-time-metrics position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75 text-white" style="display: none; z-index: 100;">
                       <div class="d-flex justify-content-between">
@@ -978,7 +940,7 @@
                   </div>
                     </div>
                   </div>
-                  
+
                   <div class="mini-map position-absolute top-0 end-0 m-2 rounded shadow-sm" style="width: 120px; height: 120px; background-color: #f8f9fa; border: 1px solid rgba(0,0,0,0.1); display: none; z-index: 100;">
                     <div class="position-relative w-100 h-100 p-1">
                       <div style="background-color: #ddd; width: 100%; height: 100%; border-radius: 2px;">
@@ -989,7 +951,7 @@
                       </div>
                     </div>
                   </div>
-                  
+
                   <div class="ai-detection-overlay position-absolute top-0 start-0 w-100 h-100" style="display: none; z-index: 90; pointer-events: none;">
                     <div class="detection-box position-absolute" style="top: 40%; left: 30%; width: 50px; height: 25px; border: 2px solid #ff0000; border-radius: 2px;">
                       <span class="badge bg-danger position-absolute" style="top: -20px; left: 0; font-size: 0.7rem;">Car: 95%</span>
@@ -999,7 +961,7 @@
                     </div>
                   </div>
                 </div>
-                
+
                 <div class="traffic-analytics-snapshot mt-2 p-2 rounded bg-light d-flex justify-content-between">
                   <div class="text-center">
                     <small class="d-block text-muted">Current Flow</small>
@@ -1044,7 +1006,7 @@
                 </button>
               </div>
             </div>
-            
+
             <!-- Real-time Incident Banner -->
             <div class="alert alert-danger d-flex align-items-center mb-3 position-relative overflow-hidden" role="alert">
               <div class="position-absolute start-0 top-0 bottom-0 bg-danger" style="width: 4px;"></div>
@@ -1068,7 +1030,7 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="table-responsive">
               <table class="table table-hover incidents-table table-responsive-stack">
                 <thead>
@@ -1085,8 +1047,8 @@
                 <tbody>
                   <tr class="bg-danger bg-opacity-10">
                     <td data-label="Date & Time">
-                      
-                        
+
+
                         <div>
                           <span>2024-03-22 09:15</span>
                           <small class="d-block text-muted" >8 minutes ago</small>
@@ -1099,13 +1061,13 @@
                       </span>
                     </td>
                     <td data-label="Location">
-                      
+
                         <i class="bi bi-geo-alt-fill text-danger me-1"></i>
                         <span>Main Intersection</span>
                         <button class="btn btn-sm text-primary ms-2 p-0" title="View on map">
                           <i class="bi bi-map"></i>
                         </button>
-                      
+
                     </td>
                     <td data-label="Severity"><span class="badge bg-danger">High</span></td>
                     <td data-label="Status">
@@ -1114,12 +1076,12 @@
                       </span>
                     </td>
                     <td data-label="Response Time">
-                      
+
                         <div class="progress flex-grow-1 me-2" style="height: 6px;">
                           <div class="progress-bar bg-success" role="progressbar" style="width: 80%;"></div>
                         </div>
                         <span>2:45</span>
-                      
+
                     </td>
                     <td data-label="Actions">
                       <div class="btn-group">
@@ -1152,13 +1114,13 @@
                       </span>
                     </td>
                     <td data-label="Location">
-                      
+
                         <i class="bi bi-geo-alt-fill text-warning me-1"></i>
                         <span>Northbound Highway</span>
                         <button class="btn btn-sm text-primary ms-2 p-0" title="View on map">
                           <i class="bi bi-map"></i>
                         </button>
-                      
+
                     </td>
                     <td data-label="Severity"><span class="badge bg-warning text-dark">Medium</span></td>
                     <td data-label="Status">
@@ -1167,12 +1129,12 @@
                       </span>
                     </td>
                     <td data-label="Response Time">
-                      
+
                         <div class="progress flex-grow-1 me-2" style="height: 6px;">
                           <div class="progress-bar bg-success" role="progressbar" style="width: 100%;"></div>
                         </div>
                         <span>5:30</span>
-                      
+
                     </td>
                     <td data-label="Actions">
                       <div class="btn-group">
@@ -1205,13 +1167,13 @@
                       </span>
                     </td>
                     <td data-label="Location">
-                      
+
                         <i class="bi bi-geo-alt-fill text-info me-1"></i>
                         <span>East-West Intersection</span>
                         <button class="btn btn-sm text-primary ms-2 p-0" title="View on map">
                           <i class="bi bi-map"></i>
                         </button>
-                      
+
                     </td>
                     <td data-label="Severity"><span class="badge bg-info">Low</span></td>
                     <td data-label="Status">
@@ -1220,12 +1182,12 @@
                       </span>
                     </td>
                     <td data-label="Response Time">
-                      
+
                         <div class="progress flex-grow-1 me-2" style="height: 6px;">
                           <div class="progress-bar bg-success" role="progressbar" style="width: 100%;"></div>
                         </div>
                         <span>1:15</span>
-                      
+
                     </td>
                     <td data-label="Actions">
                       <div class="btn-group">
@@ -1248,7 +1210,7 @@
                 </tbody>
               </table>
             </div>
-            
+
             <!-- Pagination -->
             <div class="d-flex justify-content-between align-items-center">
               <div>
@@ -1576,7 +1538,7 @@
                     <canvas id="reportDistributionChart" style="width: 100%; height: 100%;"></canvas>
                   </div>
                 </div>
-                
+
                 <div class="card mt-3">
                   <div class="card-header">
                     <h6 class="mb-0"><i class="bi bi-arrow-left-right me-2"></i>Direction Distribution</h6>
@@ -1689,7 +1651,7 @@
                       </tbody>
                     </table>
                   </div>
-                  
+
                   <div class="mt-3">
                     <h6>Manually Added Incidents</h6>
                     <div class="table-responsive">
@@ -1956,7 +1918,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Lower Footer -->
           <div class="row align-items-center">
             <div class="col-md-6 mb-3 mb-md-0">
@@ -1989,30 +1951,30 @@
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
       <!-- Toasts will be inserted here dynamically -->
     </div>
-    
+
     <!-- Bootstrap JS Bundle with Popper is already included in the head section -->
     <!-- No additional scripts needed here -->
-    
+
     <!-- Custom JS -->
     <script src="/static/js/dashboard.js"></script>
-    
+
     <!-- Fix time range buttons -->
     <script>
       // Add event listeners for time range buttons
       document.addEventListener('DOMContentLoaded', function() {
         console.log("DOM loaded - setting up custom buttons");
-        
+
         // CUSTOM RANGE BUTTON FOR TRAFFIC FLOW
         // ===================================
         const customRangeBtn = document.getElementById('customRangeBtn');
         if (customRangeBtn) {
           console.log("Found custom range button", customRangeBtn);
-          
+
           // Directly add click handler
           customRangeBtn.onclick = function(e) {
             e.preventDefault();
             console.log("Custom range button clicked");
-            
+
             // Find the modal element
             const customRangeModal = document.getElementById('customRangeModal');
             if (!customRangeModal) {
@@ -2020,23 +1982,23 @@
               alert("Error: Custom range modal not found");
                     return;
             }
-            
+
             // Set default dates (now and 2 hours ago)
             const now = new Date();
             const twoHoursAgo = new Date(now.getTime() - (2 * 60 * 60 * 1000));
-            
+
             // Format for datetime-local input: YYYY-MM-DDThh:mm
             const formatDate = (date) => {
               return date.toISOString().slice(0, 16);
             };
-            
+
             // Set values if inputs exist
             const startDateInput = document.getElementById('startDate');
             const endDateInput = document.getElementById('endDate');
-            
+
             if (startDateInput) startDateInput.value = formatDate(twoHoursAgo);
             if (endDateInput) endDateInput.value = formatDate(now);
-            
+
             // Show the modal
             if (typeof bootstrap !== 'undefined') {
               try {
@@ -2054,48 +2016,48 @@
         } else {
           console.error("Custom range button not found");
         }
-        
+
         // Apply custom range button handler
         const applyCustomBtn = document.getElementById('applyCustomRange');
         if (applyCustomBtn) {
           console.log("Found apply custom range button");
-          
+
           applyCustomBtn.onclick = function(e) {
             e.preventDefault();
             console.log("Apply custom range clicked");
-            
+
             const startInput = document.getElementById('startDate');
             const endInput = document.getElementById('endDate');
-            
+
             if (!startInput || !endInput) {
               console.error("Start or end date inputs not found");
               alert("Error: Date inputs not found");
                   return;
             }
-            
+
             const startDate = new Date(startInput.value);
             const endDate = new Date(endInput.value);
-            
+
             if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
               console.error("Invalid date format");
               alert("Please enter valid dates");
                     return;
             }
-            
+
             if (endDate <= startDate) {
               console.error("End date must be after start date");
               alert("End date must be after start date");
                 return;
               }
-              
+
             // Calculate minutes difference
             const diffMinutes = Math.round((endDate - startDate) / (60 * 1000));
             console.log(`Custom range: ${diffMinutes} minutes`);
-            
+
             // Close the modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('customRangeModal'));
             if (modal) modal.hide();
-            
+
             // Update the chart
             try {
               if (typeof window.fetchTrafficFlowData === 'function') {
@@ -2107,20 +2069,20 @@
                 console.error("Traffic data fetch function not found");
                 alert("Could not update traffic data");
               }
-              
+
               // Update button states
               document.querySelectorAll('[data-range]').forEach(btn => {
                 btn.classList.remove('active');
               });
               customRangeBtn.classList.add('active');
-              
+
             } catch (e) {
               console.error("Error applying custom range:", e);
               alert("Error applying custom range");
             }
           };
         }
-        
+
         // Add listeners for regular time range buttons (30min, 1hr, etc.)
         const timeRangeButtons = document.querySelectorAll('[data-range]:not(#customRangeBtn)');
         timeRangeButtons.forEach(button => {
@@ -2128,13 +2090,13 @@
             const range = parseInt(this.getAttribute('data-range'), 10);
             if (!isNaN(range)) {
               console.log(`Time range button clicked: ${range} minutes`);
-              
+
               // Update active state
               document.querySelectorAll('[data-range]').forEach(btn => {
                 btn.classList.remove('active');
               });
               this.classList.add('active');
-              
+
               // Call the time range function
               if (typeof window.fetchTrafficFlowData === 'function') {
                 window.fetchTrafficFlowData(range);
@@ -2146,25 +2108,25 @@
             }
           });
         });
-        
+
         // CUSTOM PERIOD BUTTON FOR REPORTS
         // ===============================
         const customPeriodBtn = document.getElementById('customPeriodBtn');
         if (customPeriodBtn) {
           console.log("Found custom period button for reports");
-          
+
           customPeriodBtn.onclick = function(e) {
             e.preventDefault();
             console.log("Custom period button clicked");
-            
+
             // Remove active class from all buttons
             document.querySelectorAll('.report-period-selector button').forEach(btn => {
               btn.classList.remove('active');
             });
-            
+
             // Add active class to this button
             this.classList.add('active');
-            
+
             // Find the modal element
             const customReportPeriodModal = document.getElementById('customReportPeriodModal');
             if (!customReportPeriodModal) {
@@ -2172,24 +2134,24 @@
               showToast("Error: Custom report period modal not found", "error");
               return;
             }
-            
+
             // Set default dates (today and one month ago)
             const today = new Date();
             const oneMonthAgo = new Date();
             oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-            
+
             // Format date for date input: YYYY-MM-DD
             const formatDate = (date) => {
               return date.toISOString().split('T')[0];
             };
-            
+
             // Set values if inputs exist
             const startDateInput = document.getElementById('reportStartDate');
             const endDateInput = document.getElementById('reportEndDate');
-            
+
             if (startDateInput) startDateInput.value = formatDate(oneMonthAgo);
             if (endDateInput) endDateInput.value = formatDate(today);
-            
+
             // Show the modal
             if (typeof bootstrap !== 'undefined') {
               try {
@@ -2207,44 +2169,44 @@
         } else {
           console.error("Custom period button for reports not found");
         }
-        
+
         // Apply custom report period button handler
         const applyReportPeriodBtn = document.getElementById('applyReportPeriod');
         if (applyReportPeriodBtn) {
           console.log("Found apply report period button");
-          
+
           applyReportPeriodBtn.onclick = function(e) {
             e.preventDefault();
             console.log("Apply report period clicked");
-            
+
             const startInput = document.getElementById('reportStartDate');
             const endInput = document.getElementById('reportEndDate');
-            
+
             if (!startInput || !endInput) {
               console.error("Report date inputs not found");
               showToast("Error: Date inputs not found", "error");
               return;
             }
-            
+
             const startDate = new Date(startInput.value);
             const endDate = new Date(endInput.value);
-            
+
             if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
               console.error("Invalid date format");
               showToast("Please enter valid dates", "warning");
               return;
             }
-            
+
             if (endDate <= startDate) {
               console.error("End date must be after start date");
               showToast("End date must be after start date", "warning");
               return;
             }
-            
+
             // Close the modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('customReportPeriodModal'));
             if (modal) modal.hide();
-            
+
             // Update the report data
             try {
               if (typeof window.updateReportData === 'function') {
@@ -2258,16 +2220,16 @@
                 console.error("Report data update function not found");
                 showToast("Could not update report data", "error");
               }
-              
+
               // Update button states - already handled in onclick
-              
+
             } catch (e) {
               console.error("Error applying custom report period:", e);
               showToast("Error applying custom report period", "error");
             }
           };
         }
-        
+
         // Add listeners for regular report period buttons (daily, weekly, monthly)
         const reportPeriodButtons = document.querySelectorAll('.report-period-selector button:not(#customPeriodBtn)');
         reportPeriodButtons.forEach(button => {
@@ -2276,13 +2238,13 @@
             console.log('period',period)
             if (period) {
               console.log(`Report period button clicked: ${period}`);
-              
+
               // Update active state
               document.querySelectorAll('.report-period-selector button').forEach(btn => {
                 btn.classList.remove('active');
               });
               this.classList.add('active');
-              
+
               // Call the report update function
               console.log('updateReportData',period)
               if (typeof window.updateReportData === 'function') {
@@ -2295,8 +2257,8 @@
             }
           });
         });
-        
-       
+
+
       });
     </script>
 
@@ -2421,7 +2383,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Key Metrics Cards -->
             <div class="row g-3 mb-4">
               <div class="col-md-3">
@@ -2473,7 +2435,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Real-time Flow Chart -->
             <div class="row mb-4">
               <div class="col-md-12">
@@ -2492,7 +2454,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Location Status & Map Row -->
             <div class="row g-3 mb-4">
               <div class="col-md-6">
@@ -2569,7 +2531,7 @@
                         <div style="position: absolute; top: 45%; left: 0; height: 10%; width: 100%; background-color: #ddd;"></div>
                         <!-- Vertical road -->
                         <div style="position: absolute; top: 0; left: 45%; width: 10%; height: 100%; background-color: #ddd;"></div>
-                        
+
                         <!-- Traffic points -->
                         <div style="position: absolute; top: 45%; left: 45%; width: 10%; height: 10%; background-color: rgba(255,0,0,0.5); border-radius: 50%;" title="Heavy Traffic"></div>
                         <div style="position: absolute; top: 20%; left: 45%; width: 10%; height: 10%; background-color: rgba(255,255,0,0.5); border-radius: 50%;" title="Moderate Traffic"></div>
@@ -2587,7 +2549,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Active Incidents -->
             <div class="row">
               <div class="col-md-12">
@@ -2667,71 +2629,64 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Direct Fix for Dropdowns -->
     <script>
       // Direct fix to ensure dropdowns work
       document.addEventListener('DOMContentLoaded', function() {
         console.log("[DirectFix] Applying immediate dropdown fixes");
-        
-        // Define specific problematic dropdowns to target directly
+
         const specificDropdowns = [
           { id: 'exportIncidents', menuSelector: '.dropdown-menu[aria-labelledby="exportIncidents"]' },
           { id: 'exportDropdown', menuSelector: '.dropdown-menu[aria-labelledby="exportDropdown"]' },
-          { id: 'exportReportDropdown', menuSelector: '.dropdown-menu[aria-labelledby="exportReportDropdown"]' }, 
+          { id: 'exportReportDropdown', menuSelector: '.dropdown-menu[aria-labelledby="exportReportDropdown"]' },
           { id: 'userDropdown', menuSelector: '.dropdown-menu[aria-labelledby="userDropdown"]' }
         ];
-        
-        // Add direct handlers for specific dropdowns
+
         specificDropdowns.forEach(item => {
           const toggle = document.getElementById(item.id);
           const menu = document.querySelector(item.menuSelector);
-          
+
           if (toggle && menu) {
             console.log(`[DirectFix] Setting up specific dropdown: ${item.id}`);
-            
-            // Force correct styling
+
             menu.style.setProperty('overflow', 'visible', 'important');
             menu.style.setProperty('max-height', 'none', 'important');
             menu.style.setProperty('height', 'auto', 'important');
             menu.style.setProperty('position', 'absolute', 'important');
             menu.style.setProperty('z-index', '9999', 'important');
-            
-            // Override click behavior
+
             toggle.addEventListener('click', function(e) {
               console.log(`[DirectFix] ${item.id} clicked`);
               e.preventDefault();
               e.stopPropagation();
-              
-              // Toggle visibility
+
               const isVisible = menu.classList.contains('show');
-              
-              // Close all other dropdowns first
+
               document.querySelectorAll('.dropdown-menu.show').forEach(otherMenu => {
                 if (otherMenu !== menu) {
                   otherMenu.classList.remove('show');
                   otherMenu.style.display = 'none';
                 }
               });
-              
-              // Toggle this dropdown
+
               if (isVisible) {
                 menu.classList.remove('show');
                 menu.style.display = 'none';
               } else {
                 menu.classList.add('show');
                 menu.style.display = 'block';
-                
+
                 // Position dropdown properly
                 const rect = toggle.getBoundingClientRect();
                 menu.style.top = rect.bottom + 'px';
-                
+
                 if (item.id === 'userDropdown' || menu.classList.contains('dropdown-menu-end')) {
-                  // Right-aligned menu (typically user dropdown)
+
                   menu.style.right = (window.innerWidth - rect.right) + 'px';
                   menu.style.left = 'auto';
                 } else {
-                  // Left-aligned menu
+
                   menu.style.left = rect.left + 'px';
                   menu.style.right = 'auto';
                 }
@@ -2739,32 +2694,29 @@
             });
           }
         });
-        
-        // Force all other dropdown toggles if specific handling didn't catch them
+
         document.querySelectorAll('.dropdown-toggle').forEach(function(toggleBtn) {
           // Skip if already handled specifically
           if (specificDropdowns.some(item => item.id === toggleBtn.id)) {
             return;
           }
-          
-          // Find dropdown menu
+
           const menu = toggleBtn.nextElementSibling;
           if (!menu || !menu.classList.contains('dropdown-menu')) {
             return;
           }
-          
-          // Fix dropdown menu styles
+
           menu.style.setProperty('overflow', 'visible', 'important');
           menu.style.setProperty('max-height', 'none', 'important');
           menu.style.setProperty('height', 'auto', 'important');
-          
+
           toggleBtn.addEventListener('click', function(e) {
             console.log('[DirectFix] Generic dropdown clicked:', toggleBtn.id || 'unnamed');
             e.preventDefault();
             e.stopPropagation();
-            
+
             const isOpen = menu.classList.contains('show');
-            
+
             // Close all other dropdowns
             document.querySelectorAll('.dropdown-menu.show').forEach(function(openMenu) {
               if (openMenu !== menu) {
@@ -2772,7 +2724,7 @@
                 openMenu.style.display = 'none';
               }
             });
-            
+
             // Toggle this one
             if (isOpen) {
               menu.classList.remove('show');
@@ -2780,12 +2732,12 @@
             } else {
               menu.classList.add('show');
               menu.style.display = 'block';
-              
+
               // Position it correctly
               const rect = this.getBoundingClientRect();
               menu.style.position = 'absolute';
               menu.style.top = rect.bottom + 'px';
-              
+
               if (menu.classList.contains('dropdown-menu-end')) {
                 menu.style.right = (window.innerWidth - rect.right) + 'px';
                 menu.style.left = 'auto';
@@ -2796,8 +2748,7 @@
             }
           });
         });
-        
-        // Close dropdowns when clicking outside
+
         document.addEventListener('click', function(e) {
           if (!e.target.closest('.dropdown')) {
             document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
@@ -2806,8 +2757,7 @@
             });
           }
         });
-        
-        // Fix any scrollbar issues immediately and on resize
+
         function fixScrollbars() {
           const elements = [
             document.querySelector('.navbar'),
@@ -2815,7 +2765,7 @@
             document.querySelector('.navbar-collapse'),
             ...document.querySelectorAll('.dropdown-menu')
           ].filter(el => el);
-          
+
           elements.forEach(el => {
             el.style.setProperty('overflow', 'visible', 'important');
             el.style.setProperty('overflow-x', 'visible', 'important');
@@ -2823,11 +2773,11 @@
             el.style.setProperty('max-height', 'none', 'important');
           });
         }
-        
+
         // Run fixes when the page loads and periodically after
         fixScrollbars();
         window.addEventListener('resize', fixScrollbars);
-        
+
         // Set interval to ensure fixes are applied
         let fixCount = 0;
         const fixInterval = setInterval(() => {
@@ -2836,13 +2786,13 @@
         }, 500);
       });
     </script>
-    
+
     <!-- Critical Fix Script - Runs directly -->
     <script>
       // Execute immediately without waiting for DOMContentLoaded
       (function() {
         console.log('[CriticalFix] Executing immediate dropdown fix');
-        
+
         // Initial fixes that require immediate attention
         function initialFix() {
           // Fix export button
@@ -2851,38 +2801,35 @@
             exportBtn.onclick = function(e) {
               e.preventDefault();
               e.stopPropagation();
-              
+
               // Find the menu
               const menu = document.querySelector('.dropdown-menu[aria-labelledby="exportIncidents"]');
               if (!menu) return;
-              
+
               // Toggle the menu
               const isVisible = menu.classList.contains('show');
               if (isVisible) {
                 menu.classList.remove('show');
                 menu.style.display = 'none';
               } else {
-                // Close all other menus
+
                 document.querySelectorAll('.dropdown-menu.show').forEach(function(openMenu) {
                   openMenu.classList.remove('show');
                   openMenu.style.display = 'none';
                 });
-                
-                // Show this menu
+
                 menu.classList.add('show');
                 menu.style.display = 'block';
-                
-                // Style and position the menu
+
                 menu.style.overflow = 'visible';
                 menu.style.maxHeight = 'none';
                 menu.style.height = 'auto';
                 menu.style.position = 'absolute';
                 menu.style.zIndex = '9999';
-                
-                // Position it based on the button
+
                 const rect = exportBtn.getBoundingClientRect();
                 menu.style.top = rect.bottom + 'px';
-                
+
                 if (menu.classList.contains('dropdown-menu-end')) {
                   menu.style.right = (window.innerWidth - rect.right) + 'px';
                   menu.style.left = 'auto';
@@ -2893,8 +2840,7 @@
               }
             };
           }
-          
-          // Apply similar fix to other important dropdowns
+
           ['userDropdown', 'exportDropdown', 'exportReportDropdown'].forEach(function(id) {
             const btn = document.getElementById(id);
             if (btn) {
@@ -2905,40 +2851,32 @@
                 const menuSelector = '.dropdown-menu[aria-labelledby="' + id + '"]';
                 const menu = document.querySelector(menuSelector);
                 if (!menu) return;
-                
-                // Toggle visibility
+
                 const isVisible = menu.classList.contains('show');
                 if (isVisible) {
                   menu.classList.remove('show');
                   menu.style.display = 'none';
                 } else {
-                  // Close all other menus
                   document.querySelectorAll('.dropdown-menu.show').forEach(function(openMenu) {
                     openMenu.classList.remove('show');
                     openMenu.style.display = 'none';
                   });
-                  
-                  // Show this menu
+
                   menu.classList.add('show');
                   menu.style.display = 'block';
-                  
-                  // Style and position
+
                   menu.style.overflow = 'visible';
                   menu.style.maxHeight = 'none';
                   menu.style.height = 'auto';
                   menu.style.zIndex = '9999';
                   menu.style.position = 'absolute';
-                  
-                  // Position the menu based on the button
                   const rect = btn.getBoundingClientRect();
                   menu.style.top = rect.bottom + 'px';
-                  
-                  if (id === 'userDropdown' || menu.classList.contains('dropdown-menu-end')) {
-                    // Right aligned dropdowns
+
+                  if (id === 'userDropdown' || menu.classList.contains('dropdown-menu-end')) {              
                     menu.style.right = (window.innerWidth - rect.right) + 'px';
                     menu.style.left = 'auto';
-                  } else {
-                    // Left aligned dropdowns
+                  } else {              
                     menu.style.left = rect.left + 'px';
                     menu.style.right = 'auto';
                   }
@@ -2946,8 +2884,7 @@
               };
             }
           });
-          
-          // Global click handler to close dropdowns
+
           document.addEventListener('click', function(e) {
             if (!e.target.closest('.dropdown')) {
               document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
@@ -2957,12 +2894,11 @@
             }
           });
         }
-        
-        // Run now if possible, otherwise after a very short delay
+
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
           initialFix();
         } else {
-          // Run as soon as we can
+
           setTimeout(initialFix, 10);
         }
       })();
@@ -2970,31 +2906,27 @@
 
     <!-- Critical Fix Script - Runs directly -->
     <script>
-      // Wait for DOM content loaded
+
       document.addEventListener('DOMContentLoaded', function() {
         console.log('[Final Fix] Applying final dropdown cleanup');
-        
-        // Give Bootstrap time to initialize
+
         setTimeout(() => {
-          // Get all dropdown toggles
+ 
           const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
-          
-          // Ensure every toggle has the correct attributes 
+
           dropdownToggles.forEach(toggle => {
             // Make sure it has proper attributes
             if (!toggle.hasAttribute('data-bs-toggle')) {
               toggle.setAttribute('data-bs-toggle', 'dropdown');
             }
-            
-            // Force BS to reinitialize this dropdown
+
             if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
               new bootstrap.Dropdown(toggle);
             }
-            
+
             console.log(`[Final Fix] Initialized dropdown: ${toggle.id || 'unnamed'}`);
           });
-          
-          // Fix any scroll issues
+
           const elements = document.querySelectorAll('.navbar, .navbar-collapse, .dropdown, .dropdown-menu');
           elements.forEach(el => {
             if (el) {
