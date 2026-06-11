@@ -902,7 +902,7 @@
                      </video>
 
                     <!-- Video Controls Overlay -->
-                    <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75" style="z-index: 95;">
+                    <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75" style="z-index: 200;">
                     <div class="d-flex justify-content-between align-items-center">
                      <div>
                     <button class="btn btn-sm btn-outline-light me-2 play-pause-btn" data-video="main">
@@ -923,7 +923,7 @@
                    </div>
                    </div>
 
-                    <div class="real-time-metrics position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75 text-white" style="display: none; z-index: 100;">
+                    <div class="real-time-metrics position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75 text-white" style="display: none; z-index: 100; pointer-events: none;">
                       <div class="d-flex justify-content-between">
                         <div>
                           <small><i class="bi bi-car-front me-1"></i>Vehicles: <span class="vehicle-count">0</span></small>
@@ -2636,6 +2636,7 @@
       document.addEventListener('DOMContentLoaded', function() {
         console.log("[DirectFix] Applying immediate dropdown fixes");
 
+        // Define specific problematic dropdowns to target directly
         const specificDropdowns = [
           { id: 'exportIncidents', menuSelector: '.dropdown-menu[aria-labelledby="exportIncidents"]' },
           { id: 'exportDropdown', menuSelector: '.dropdown-menu[aria-labelledby="exportDropdown"]' },
@@ -2643,6 +2644,7 @@
           { id: 'userDropdown', menuSelector: '.dropdown-menu[aria-labelledby="userDropdown"]' }
         ];
 
+        // Add direct handlers for specific dropdowns
         specificDropdowns.forEach(item => {
           const toggle = document.getElementById(item.id);
           const menu = document.querySelector(item.menuSelector);
@@ -2650,19 +2652,23 @@
           if (toggle && menu) {
             console.log(`[DirectFix] Setting up specific dropdown: ${item.id}`);
 
+            // Force correct styling
             menu.style.setProperty('overflow', 'visible', 'important');
             menu.style.setProperty('max-height', 'none', 'important');
             menu.style.setProperty('height', 'auto', 'important');
             menu.style.setProperty('position', 'absolute', 'important');
             menu.style.setProperty('z-index', '9999', 'important');
 
+            // Override click behavior
             toggle.addEventListener('click', function(e) {
               console.log(`[DirectFix] ${item.id} clicked`);
               e.preventDefault();
               e.stopPropagation();
 
+              // Toggle visibility
               const isVisible = menu.classList.contains('show');
 
+              // Close all other dropdowns first
               document.querySelectorAll('.dropdown-menu.show').forEach(otherMenu => {
                 if (otherMenu !== menu) {
                   otherMenu.classList.remove('show');
@@ -2670,6 +2676,7 @@
                 }
               });
 
+              // Toggle this dropdown
               if (isVisible) {
                 menu.classList.remove('show');
                 menu.style.display = 'none';
@@ -2682,11 +2689,11 @@
                 menu.style.top = rect.bottom + 'px';
 
                 if (item.id === 'userDropdown' || menu.classList.contains('dropdown-menu-end')) {
-
+                  // Right-aligned menu (typically user dropdown)
                   menu.style.right = (window.innerWidth - rect.right) + 'px';
                   menu.style.left = 'auto';
                 } else {
-
+                  // Left-aligned menu
                   menu.style.left = rect.left + 'px';
                   menu.style.right = 'auto';
                 }
@@ -2695,17 +2702,20 @@
           }
         });
 
+        // Force all other dropdown toggles if specific handling didn't catch them
         document.querySelectorAll('.dropdown-toggle').forEach(function(toggleBtn) {
           // Skip if already handled specifically
           if (specificDropdowns.some(item => item.id === toggleBtn.id)) {
             return;
           }
 
+          // Find dropdown menu
           const menu = toggleBtn.nextElementSibling;
           if (!menu || !menu.classList.contains('dropdown-menu')) {
             return;
           }
 
+          // Fix dropdown menu styles
           menu.style.setProperty('overflow', 'visible', 'important');
           menu.style.setProperty('max-height', 'none', 'important');
           menu.style.setProperty('height', 'auto', 'important');
@@ -2749,6 +2759,7 @@
           });
         });
 
+        // Close dropdowns when clicking outside
         document.addEventListener('click', function(e) {
           if (!e.target.closest('.dropdown')) {
             document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
@@ -2758,6 +2769,7 @@
           }
         });
 
+        // Fix any scrollbar issues immediately and on resize
         function fixScrollbars() {
           const elements = [
             document.querySelector('.navbar'),
@@ -2812,21 +2824,24 @@
                 menu.classList.remove('show');
                 menu.style.display = 'none';
               } else {
-
+                // Close all other menus
                 document.querySelectorAll('.dropdown-menu.show').forEach(function(openMenu) {
                   openMenu.classList.remove('show');
                   openMenu.style.display = 'none';
                 });
 
+                // Show this menu
                 menu.classList.add('show');
                 menu.style.display = 'block';
 
+                // Style and position the menu
                 menu.style.overflow = 'visible';
                 menu.style.maxHeight = 'none';
                 menu.style.height = 'auto';
                 menu.style.position = 'absolute';
                 menu.style.zIndex = '9999';
 
+                // Position it based on the button
                 const rect = exportBtn.getBoundingClientRect();
                 menu.style.top = rect.bottom + 'px';
 
@@ -2841,42 +2856,51 @@
             };
           }
 
+          // Apply similar fix to other important dropdowns
           ['userDropdown', 'exportDropdown', 'exportReportDropdown'].forEach(function(id) {
             const btn = document.getElementById(id);
             if (btn) {
               btn.onclick = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const menuSelector = '.dropdown-menu[aria-labelledby="' + id + '"]';
                 const menu = document.querySelector(menuSelector);
                 if (!menu) return;
 
+                // Toggle visibility
                 const isVisible = menu.classList.contains('show');
                 if (isVisible) {
                   menu.classList.remove('show');
                   menu.style.display = 'none';
                 } else {
+                  // Close all other menus
                   document.querySelectorAll('.dropdown-menu.show').forEach(function(openMenu) {
                     openMenu.classList.remove('show');
                     openMenu.style.display = 'none';
                   });
 
+                  // Show this menu
                   menu.classList.add('show');
                   menu.style.display = 'block';
 
+                  // Style and position
                   menu.style.overflow = 'visible';
                   menu.style.maxHeight = 'none';
                   menu.style.height = 'auto';
                   menu.style.zIndex = '9999';
                   menu.style.position = 'absolute';
+
+                  // Position the menu based on the button
                   const rect = btn.getBoundingClientRect();
                   menu.style.top = rect.bottom + 'px';
 
-                  if (id === 'userDropdown' || menu.classList.contains('dropdown-menu-end')) {              
+                  if (id === 'userDropdown' || menu.classList.contains('dropdown-menu-end')) {
+                    // Right aligned dropdowns
                     menu.style.right = (window.innerWidth - rect.right) + 'px';
                     menu.style.left = 'auto';
-                  } else {              
+                  } else {
+                    // Left aligned dropdowns
                     menu.style.left = rect.left + 'px';
                     menu.style.right = 'auto';
                   }
@@ -2885,6 +2909,7 @@
             }
           });
 
+          // Global click handler to close dropdowns
           document.addEventListener('click', function(e) {
             if (!e.target.closest('.dropdown')) {
               document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
@@ -2895,10 +2920,11 @@
           });
         }
 
+        // Run now if possible, otherwise after a very short delay
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
           initialFix();
         } else {
-
+          // Run as soon as we can
           setTimeout(initialFix, 10);
         }
       })();
@@ -2906,20 +2932,23 @@
 
     <!-- Critical Fix Script - Runs directly -->
     <script>
-
+      // Wait for DOM content loaded
       document.addEventListener('DOMContentLoaded', function() {
         console.log('[Final Fix] Applying final dropdown cleanup');
 
+        // Give Bootstrap time to initialize
         setTimeout(() => {
- 
+          // Get all dropdown toggles
           const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
 
+          // Ensure every toggle has the correct attributes
           dropdownToggles.forEach(toggle => {
             // Make sure it has proper attributes
             if (!toggle.hasAttribute('data-bs-toggle')) {
               toggle.setAttribute('data-bs-toggle', 'dropdown');
             }
 
+            // Force BS to reinitialize this dropdown
             if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
               new bootstrap.Dropdown(toggle);
             }
@@ -2927,6 +2956,7 @@
             console.log(`[Final Fix] Initialized dropdown: ${toggle.id || 'unnamed'}`);
           });
 
+          // Fix any scroll issues
           const elements = document.querySelectorAll('.navbar, .navbar-collapse, .dropdown, .dropdown-menu');
           elements.forEach(el => {
             if (el) {
