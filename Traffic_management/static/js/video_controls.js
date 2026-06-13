@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+
     function initVideoControls(videoId, dataKey) {
         const video = document.getElementById(videoId);
         if (!video) {
@@ -18,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const controlsContainer = playPauseBtn.closest('.video-controls');
         if (controlsContainer) {
-            
             controlsContainer.style.setProperty('z-index', '200', 'important');
             controlsContainer.style.setProperty('pointer-events', 'all', 'important');
             controlsContainer.style.setProperty('position', 'absolute', 'important');
@@ -40,10 +40,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (metricsOverlay) {
                 metricsOverlay.style.setProperty('pointer-events', 'none', 'important');
-                // Keep its existing z-index (100) but make sure it cannot swallow clicks
             }
             if (detectionOverlay) {
-                // Already has pointer-events: none in HTML, but enforce it here too
                 detectionOverlay.style.setProperty('pointer-events', 'none', 'important');
             }
         }
